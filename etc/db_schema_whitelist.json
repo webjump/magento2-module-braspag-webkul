@@ -1,0 +1,12 @@
+{
+    "marketplace_userdata": {
+        "column": {
+            "braspag_subordinate_merchantid": true,
+            "braspag_subordinate_mdr": true,
+            "braspag_subordinate_fee": true
+        },
+        "constraint": {
+            "PRIMARY": true
+        }
+    }
+}
