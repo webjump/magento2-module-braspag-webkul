@@ -57,11 +57,20 @@ class SplitDataProvider
         $this->resource = $resource;
         $this->session = $session;
 
-        $this->marketplaceMerchantId = $this->paymentSplitConfig->getPaymentSplitMarketPlaceCredendialsMerchantId();
-        $this->marketplaceSalesParticipation = (bool) $this->paymentSplitConfig->getPaymentSplitMarketPlaceGeneralSalesParticipation();
-        $this->marketplaceSalesParticipationType = $this->paymentSplitConfig->getPaymentSplitMarketPlaceGeneralSalesParticipationType();
-        $this->marketplaceSalesParticipationPercent = floatval($this->paymentSplitConfig->getPaymentSplitMarketPlaceGeneralSalesParticipationPercent());
-        $this->marketplaceSalesParticipationFixedValue = floatval($this->paymentSplitConfig->getPaymentSplitMarketPlaceGeneralSalesParticipationFixedValue());
+        $this->marketplaceMerchantId = $this->paymentSplitConfig
+            ->getPaymentSplitMarketPlaceCredendialsMerchantId();
+
+        $this->marketplaceSalesParticipation = (bool) $this->paymentSplitConfig
+            ->getPaymentSplitMarketPlaceGeneralSalesParticipation();
+
+        $this->marketplaceSalesParticipationType = $this->paymentSplitConfig
+            ->getPaymentSplitMarketPlaceGeneralSalesParticipationType();
+
+        $this->marketplaceSalesParticipationPercent = floatval($this->paymentSplitConfig
+            ->getPaymentSplitMarketPlaceGeneralSalesParticipationPercent());
+
+        $this->marketplaceSalesParticipationFixedValue = floatval($this->paymentSplitConfig
+            ->getPaymentSplitMarketPlaceGeneralSalesParticipationFixedValue());
     }
 
     /**
@@ -146,15 +155,28 @@ class SplitDataProvider
                 $this->subordinates[$braspagSubordinateMerchantId]['skus'] = [];
             }
 
-            $braspagSubordinateMdr = $this->getSubordinateItemMdr($braspagSubordinateMdr, $subject, $sellerInfo, $product);
-            $braspagSubordinateFee = $this->getSubordinateItemFee($braspagSubordinateFee, $subject, $sellerInfo, $product);
+            $braspagSubordinateMdr = $this->getSubordinateItemMdr(
+                $braspagSubordinateMdr,
+                $subject,
+                $sellerInfo,
+                $product
+            );
+
+            $braspagSubordinateFee = $this->getSubordinateItemFee(
+                $braspagSubordinateFee,
+                $subject,
+                $sellerInfo,
+                $product
+            );
 
             if (isset($this->subordinates[$braspagSubordinateMerchantId]['fares'])) {
                 $this->subordinates[$braspagSubordinateMerchantId]['fares']['mdr'] = $braspagSubordinateMdr;
                 $this->subordinates[$braspagSubordinateMerchantId]['fares']['fee'] = $braspagSubordinateFee;
             }
 
-            $itemPrice = floatval(($item->getPriceInclTax()*$item->getQty()) - $item->getDiscountAmount());
+            $itemQty = $item->getQtyOrdered()-$item->getQtyCanceled()-$item->getQtyShipped();
+
+            $itemPrice = floatval(($item->getPriceInclTax()*$itemQty) - $item->getDiscountAmount());
 
             $this->subordinates[$braspagSubordinateMerchantId]['amount'] += ($itemPrice * 100);
 
