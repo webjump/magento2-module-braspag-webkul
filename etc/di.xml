@@ -2,6 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Webkul\Marketplace\Block\Adminhtml\Customer\Edit\Tabs" type="Braspag\Webkul\Block\Adminhtml\Customer\Edit\Tabs"/>
     <preference for="Webkul\Marketplace\Controller\Account\EditprofilePost" type="Braspag\Webkul\Controller\Account\EditprofilePost"/>
+    <preference for="Webkul\Marketplace\Helper\Data" type="Braspag\Webkul\Helper\Data"/>
 
     <type name="Webjump\BraspagPagador\Model\Source\PaymentSplitMarketplaceVendor">
         <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceList"/>

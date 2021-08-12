@@ -19,7 +19,6 @@ use Magento\Framework\Session\SessionManager;
 class SplitDataProvider
 {
     protected $paymentSplitConfig;
-    protected $webkulHelper;
     protected $objectFactory;
     protected $marketplaceMerchantId;
     protected $marketplaceDefaultMdr = 0;
@@ -32,30 +31,43 @@ class SplitDataProvider
     protected $subordinates = [];
     protected $customerFactory;
     protected $resource;
+    protected $ordersRepository;
+    protected $webkulPayment;
+    protected $webkulHelperData;
+    protected $serializerJson;
 
     /**
      * SplitDataProvider constructor.
      * @param \Webjump\BraspagPagador\Gateway\Transaction\PaymentSplit\Config\Config $paymentSplitConfig
-     * @param \Webkul\MpAssignProduct\Helper\Data $webkulHelper
      * @param \Magento\Framework\DataObjectFactory $objectFactory
      * @param \Magento\Customer\Model\CustomerFactory $customerFactory
      * @param \Magento\Framework\App\ResourceConnection $resource
      * @param SessionManager $session
+     * @param \Webkul\Marketplace\Model\OrdersRepository $ordersRepository
+     * @param \Webkul\Marketplace\Helper\Payment $webkulPayment
+     * @param \Webkul\Marketplace\Helper\Data $webkulHelperData
+     * @param \Magento\Framework\Serialize\Serializer\Json $serializerJson
      */
     public function __construct(
         \Webjump\BraspagPagador\Gateway\Transaction\PaymentSplit\Config\Config $paymentSplitConfig,
-        \Webkul\MpAssignProduct\Helper\Data $webkulHelper,
         \Magento\Framework\DataObjectFactory $objectFactory,
         \Magento\Customer\Model\CustomerFactory $customerFactory,
         \Magento\Framework\App\ResourceConnection $resource,
-        SessionManager $session
+        SessionManager $session,
+        \Webkul\Marketplace\Model\OrdersRepository $ordersRepository,
+        \Webkul\Marketplace\Helper\Payment $webkulPayment,
+        \Webkul\Marketplace\Helper\Data $webkulHelperData,
+        \Magento\Framework\Serialize\Serializer\Json $serializerJson
     ) {
         $this->paymentSplitConfig = $paymentSplitConfig;
-        $this->webkulHelper = $webkulHelper;
         $this->objectFactory = $objectFactory;
         $this->customerFactory = $customerFactory;
         $this->resource = $resource;
         $this->session = $session;
+        $this->ordersRepository = $ordersRepository;
+        $this->webkulPayment = $webkulPayment;
+        $this->webkulHelperData = $webkulHelperData;
+        $this->serializerJson = $serializerJson;
 
         $this->marketplaceMerchantId = $this->paymentSplitConfig
             ->getPaymentSplitMarketPlaceCredendialsMerchantId();
@@ -80,6 +92,8 @@ class SplitDataProvider
      * @param int $storeDefaultMdr
      * @param int $storeDefaultFee
      * @return mixed
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      */
     public function afterGetData(
         \Webjump\BraspagPagador\Model\SplitDataProvider $subject,
@@ -100,96 +114,43 @@ class SplitDataProvider
 
         $this->subordinates = $items = [];
 
-        $itemType = 'quote';
+        $subjectData = $this->getSubjectData($subject);
+        $entityType = $subjectData['entityType'];
+        $entityItems = $subjectData['entityItems'];
+        $entityData = $subjectData['entityData'];
 
-        if (!empty($subject->getQuote())) {
-            $items = $subject->getQuote()->getAllVisibleItems();
-            $itemType = 'quote';
-        }
-
-        if (empty($items) && !empty($subject->getOrder())) {
-            $items = $subject->getOrder()->getAllVisibleItems();
-            $itemType = 'order';
-        }
-
-        if (empty($items)) {
-            $items = $subject->getSession()->getQuote()->getAllVisibleItems();
-            $itemType = 'quote';
-        }
-
-        foreach ($items as $item) {
+        foreach ($entityItems as $item) {
 
             $product = $item->getProduct();
-
-            $sellerId = $this->webkulHelper->getSellerIdByProductId($product->getId());
+            
+            $sellerId = $this->getItemSellerId($item, $entityType, $entityData);
 
             $sellerInfo = $this->getSellerInfo($sellerId);
 
-            $braspagSubordinateMdr = floatval($this->getProductAttributeByCode($product,
-                'braspag_subordinate_mdr',
-                $subject->getStoreManager()->getStore()->getId()
-            ));
+            $subordinateMerchantId = $sellerInfo->getData('braspag_subordinate_merchantid');
 
-            $braspagSubordinateFee = floatval($this->getProductAttributeByCode($product,
-                'braspag_subordinate_fee',
-                $subject->getStoreManager()->getStore()->getId()
-            ));
-
-            $braspagSubordinateMerchantId = $sellerInfo->getData('braspag_subordinate_merchantid');
-
-            if (empty($braspagSubordinateMerchantId)) {
-                $braspagSubordinateMerchantId = $this->marketplaceMerchantId;
+            if (empty($subordinateMerchantId)) {
+                $subordinateMerchantId = $this->marketplaceMerchantId;
             }
 
-            if (!isset($this->subordinates[$braspagSubordinateMerchantId])) {
-                $this->subordinates[$braspagSubordinateMerchantId] = [];
-                $this->subordinates[$braspagSubordinateMerchantId]['amount'] = 0;
+            $this->populeSubordinateMdrFeeData($subject, $product, $sellerInfo, $subordinateMerchantId);
 
-                if ($braspagSubordinateMerchantId !== $this->marketplaceMerchantId) {
-                    $this->subordinates[$braspagSubordinateMerchantId]['fares'] = [
-                        "mdr" => floatval($this->marketplaceDefaultMdr),
-                        "fee" => floatval($this->marketplaceDefaultFee)
-                    ];
-                }
-
-                $this->subordinates[$braspagSubordinateMerchantId]['skus'] = [];
-            }
-
-            $braspagSubordinateMdr = $this->getSubordinateItemMdr(
-                $braspagSubordinateMdr,
-                $subject,
-                $sellerInfo,
-                $product
-            );
-
-            $braspagSubordinateFee = $this->getSubordinateItemFee(
-                $braspagSubordinateFee,
-                $subject,
-                $sellerInfo,
-                $product
-            );
-
-            if (isset($this->subordinates[$braspagSubordinateMerchantId]['fares'])) {
-                $this->subordinates[$braspagSubordinateMerchantId]['fares']['mdr'] = $braspagSubordinateMdr;
-                $this->subordinates[$braspagSubordinateMerchantId]['fares']['fee'] = $braspagSubordinateFee;
-            }
-
-            $itemQty = $item->getQtyOrdered()-$item->getQtyCanceled()-$item->getQtyShipped();
+            $itemQty = $this->getItemQty($item, $entityType);
 
             $itemPrice = floatval(($item->getPriceInclTax()*$itemQty) - $item->getDiscountAmount());
 
-            $this->subordinates[$braspagSubordinateMerchantId]['amount'] += ($itemPrice * 100);
+            $this->subordinates[$subordinateMerchantId]['amount'] += ($itemPrice * 100);
 
             $itemsObject = $this->objectFactory->create();
             $items = [
                 "item_id" => $item->getId(),
-                "item_type" => $itemType,
+                "item_type" => $entityType,
                 "sku" => $product->getSku()
             ];
 
             $itemsObject->addData($items);
 
-            $this->subordinates[$braspagSubordinateMerchantId]['items'][] =  $itemsObject;
+            $this->subordinates[$subordinateMerchantId]['items'][] =  $itemsObject;
         }
 
         if ($this->marketplaceSalesParticipation) {
@@ -203,6 +164,152 @@ class SplitDataProvider
     }
 
     /**
+     * @param $subject
+     * @return array
+     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
+     */
+    private function getSubjectData($subject)
+    {
+        $entityType = 'quote';
+
+        $entityData = null;
+
+        if (!empty($subject->getQuote())) {
+            $items = $subject->getQuote()->getAllVisibleItems();
+            $entityType = 'quote';
+            $entityData = $this->webkulPayment->prepareSplitPaymentData($subject->getQuote());
+        }
+
+        if (empty($items) && !empty($subject->getOrder())) {
+            $items = $subject->getOrder()->getAllVisibleItems();
+            $entityType = 'order';
+            $entityData = $this->ordersRepository->getByOrderId($subject->getOrder()->getId());
+        }
+
+        if (empty($items)) {
+            $items = $subject->getSession()->getQuote()->getAllVisibleItems();
+            $entityType = 'quote';
+            $entityData = $this->webkulPayment->prepareSplitPaymentData($subject->getSession()->getQuote());
+        }
+
+        return [
+            'entityType' => $entityType,
+            'entityItems' => !empty($items) ? $items : [],
+            'entityData' => $entityData,
+        ];
+    }
+
+    /**
+     * @param $item
+     * @param $entityType
+     * @param $entityData
+     * @return int|string
+     */
+    private function getItemSellerId($item, $entityType, $entityData)
+    {
+        $sellerId = '';
+        $product = $item->getProduct();
+
+        if ($entityType === 'quote' && !empty($entityData)) {
+
+            $itemOptionsData = $item->getOptionByCode('info_buyRequest');
+            $itemOptionsDataUnserialized = $this->serializerJson->unserialize($itemOptionsData->getValue());
+
+            if (isset($itemOptionsDataUnserialized['product'])
+                && $itemOptionsDataUnserialized['product'] == $product->getId()
+            ) {
+                if (isset($itemOptionsDataUnserialized['mpassignproduct_id'])
+                    && $itemOptionsDataUnserialized['mpassignproduct_id'] != '0') {
+                    $sellerId = $this->webkulHelperData->getSellerId(
+                        $itemOptionsDataUnserialized['mpassignproduct_id']
+                        , $product->getId()
+                    );
+
+                } else {
+                    $sellerId = $this->webkulHelperData->getSellerId(
+                        ''
+                        , $product->getId());
+                }
+            }
+        }
+
+        if ($entityType === 'order' && !empty($entityData)) {
+
+            foreach ($entityData as $webkulOrderItemsData) {
+                $webkulOrderItemProductIds = explode(",", $webkulOrderItemsData->getData('product_ids'));
+                if (in_array($product->getId(), $webkulOrderItemProductIds)) {
+                    $sellerId = $webkulOrderItemsData->getData('seller_id');
+                    break;
+                }
+            }
+        }
+
+        return $sellerId;
+    }
+
+    /**
+     * @param $item
+     * @param $entityType
+     * @return int
+     */
+    private function getItemQty($item, $entityType)
+    {
+        $itemQty = 1;
+
+        if ($entityType === 'quote') {
+            $itemQty = $item->getQty();
+        }
+
+        if ($entityType === 'order') {
+            $itemQty = $item->getQtyOrdered()-$item->getQtyCanceled()-$item->getQtyShipped();
+        }
+
+        return $itemQty;
+    }
+
+    /**
+     * @param $subject
+     * @param $product
+     * @param $sellerInfo
+     * @param $subordinateMerchantId
+     * @return $this
+     */
+    private function populeSubordinateMdrFeeData($subject, $product, $sellerInfo, $subordinateMerchantId)
+    {
+        $subordinateMdr = floatval($this->getProductAttributeByCode($product,
+            'braspag_subordinate_mdr', $subject->getStoreManager()->getStore()->getId()
+        ));
+
+        $subordinateFee = floatval($this->getProductAttributeByCode($product,
+            'braspag_subordinate_fee', $subject->getStoreManager()->getStore()->getId()
+        ));
+
+        if (!isset($this->subordinates[$subordinateMerchantId])) {
+            $this->subordinates[$subordinateMerchantId] = [];
+            $this->subordinates[$subordinateMerchantId]['amount'] = 0;
+
+            if ($subordinateMerchantId !== $this->marketplaceMerchantId) {
+                $this->subordinates[$subordinateMerchantId]['fares'] = [
+                    "mdr" => floatval($this->marketplaceDefaultMdr),
+                    "fee" => floatval($this->marketplaceDefaultFee)
+                ];
+            }
+            $this->subordinates[$subordinateMerchantId]['skus'] = [];
+        }
+
+        $subordinateMdr = $this->getSubordinateItemMdr($subordinateMdr, $subject, $sellerInfo, $product);
+        $subordinateFee = $this->getSubordinateItemFee($subordinateFee, $subject, $sellerInfo, $product);
+
+        if (isset($this->subordinates[$subordinateMerchantId]['fares'])) {
+            $this->subordinates[$subordinateMerchantId]['fares']['mdr'] = $subordinateMdr;
+            $this->subordinates[$subordinateMerchantId]['fares']['fee'] = $subordinateFee;
+        }
+
+        return $this;
+    }
+
+    /**
      * @param $vendorProductMdr
      * @param $subject
      * @param $sellerInfo
@@ -211,18 +318,18 @@ class SplitDataProvider
      */
     protected function getSubordinateItemMdr($vendorProductMdr, $subject, $sellerInfo, $product)
     {
-        $braspagSubordinateMdr = null;
+        $subordinateMdr = null;
 
         if (!empty($vendorProductMdr)) {
-            $braspagSubordinateMdr = $vendorProductMdr;
+            $subordinateMdr = $vendorProductMdr;
         }
 
-        if (empty($braspagSubordinateMdr)) {
-            $braspagSubordinateMdr = $sellerInfo->getData('braspag_subordinate_mdr');
+        if (empty($subordinateMdr)) {
+            $subordinateMdr = $sellerInfo->getData('braspag_subordinate_mdr');
         }
 
-        if (empty($braspagSubordinateMdr)) {
-            $braspagSubordinateMdr = $product->getResource()
+        if (empty($subordinateMdr)) {
+            $subordinateMdr = $product->getResource()
                 ->getAttributeRawValue(
                     $product->getId(),
                     'braspag_subordinate_mdr',
@@ -230,34 +337,34 @@ class SplitDataProvider
                 );
         }
 
-        if (empty($braspagSubordinateMdr)) {
-            $braspagSubordinateMdr = $this->marketplaceDefaultMdr;
+        if (empty($subordinateMdr)) {
+            $subordinateMdr = $this->marketplaceDefaultMdr;
         }
 
-        return $braspagSubordinateMdr;
+        return $subordinateMdr;
     }
 
     /**
      * @param $vendorProductFee
      * @param $subject
-     * @param $vendor
+     * @param $sellerInfo
      * @param $product
      * @return int|null
      */
     protected function getSubordinateItemFee($vendorProductFee, $subject, $sellerInfo, $product)
     {
-        $braspagSubordinateFee = null;
+        $subordinateFee = null;
 
         if (!empty($vendorProductFee)) {
-            $braspagSubordinateFee = $vendorProductFee;
+            $subordinateFee = $vendorProductFee;
         }
 
-        if (empty($braspagSubordinateFee)) {
-            $braspagSubordinateFee = $sellerInfo->getData('braspag_subordinate_fee');
+        if (empty($subordinateFee)) {
+            $subordinateFee = $sellerInfo->getData('braspag_subordinate_fee');
         }
 
-        if (empty($braspagSubordinateFee)) {
-            $braspagSubordinateFee = $product->getResource()
+        if (empty($subordinateFee)) {
+            $subordinateFee = $product->getResource()
                 ->getAttributeRawValue(
                     $product->getId(),
                     'braspag_subordinate_fee',
@@ -265,11 +372,11 @@ class SplitDataProvider
                 );
         }
 
-        if (empty($braspagSubordinateFee)) {
-            $braspagSubordinateFee = $this->marketplaceDefaultFee;
+        if (empty($subordinateFee)) {
+            $subordinateFee = $this->marketplaceDefaultFee;
         }
 
-        return $braspagSubordinateFee;
+        return $subordinateFee;
     }
 
     /**
@@ -321,7 +428,7 @@ class SplitDataProvider
 
     /**
      * @param $customerId
-     * @return mixed
+     * @return \Magento\Framework\DataObject
      */
     protected function getSellerInfo($customerId)
     {
