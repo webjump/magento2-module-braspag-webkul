@@ -33,6 +33,7 @@ class Data extends \Webkul\Marketplace\Helper\Data
             $mpassignModel = $this->assignItemsFactory->create()->load($mpassignproductId);
             $sellerId = $mpassignModel->getSellerId();
         } else {
+
             $collection = $this->_mpProductCollectionFactory->create()
                                 ->addFieldToFilter('mage_pro_row_id', ['eq' => $proid]);
             foreach ($collection as $temp) {

@@ -11,6 +11,7 @@
 namespace Braspag\Webkul\Plugin;
 
 use Magento\Framework\Session\SessionManager;
+use Magento\Framework\Exception\LocalizedException;
 
 /**
  * Class SplitDataProvider
@@ -119,6 +120,8 @@ class SplitDataProvider
         $entityItems = $subjectData['entityItems'];
         $entityData = $subjectData['entityData'];
 
+        $divisionAmount = $orderedGrandTotal = $orderedShippingAmount = 0;
+
         foreach ($entityItems as $item) {
 
             $product = $item->getProduct();
@@ -139,6 +142,8 @@ class SplitDataProvider
 
             $itemPrice = floatval(($item->getPriceInclTax()*$itemQty) - $item->getDiscountAmount());
 
+            $divisionAmount += $itemPrice;
+
             $this->subordinates[$subordinateMerchantId]['amount'] += ($itemPrice * 100);
 
             $itemsObject = $this->objectFactory->create();
@@ -158,9 +163,49 @@ class SplitDataProvider
             $this->addMarketplaceParticipationValues();
         }
 
-        $result = $subject->getSplitAdapter()->adapt($this->subordinates, $this->marketplaceMerchantId);
+        $orderedShippingAmount = $this->divisionShippingAmountProcess($entityType, $divisionAmount, $subject);
+
+        if (($divisionAmount+$orderedShippingAmount) < $orderedGrandTotal) {
+            throw new LocalizedException(
+                __('Invalid Split Division Amount.')
+            );
+        }
+
+        $result = $subject->getSplitAdapter()->adaptRequestData($this->subordinates, $this->marketplaceMerchantId);
 
         return $result;
+    }
+
+    /**
+     * @param $entityType
+     * @param $divisionAmount
+     * @param $subject
+     * @return mixed
+     */
+    public function divisionShippingAmountProcess($entityType, $divisionAmount, $subject)
+    {
+        if ($entityType == 'quote') {
+            $orderedGrandTotal = $subject->getQuote()->getGrandTotal();
+            $orderedShippingAmount = $subject->getQuote()->getShippingAddress()->getShippingAmount();
+        }
+
+        if ($entityType == 'order') {
+            $orderedGrandTotal = $subject->getOrder()->getGrandTotal();
+            $orderedShippingAmount = $subject->getOrder()->getShippingAmount();
+        }
+
+        if ($divisionAmount < $orderedGrandTotal && ($divisionAmount + $orderedShippingAmount) == $orderedGrandTotal) {
+
+            if (!isset($this->subordinates[$this->marketplaceMerchantId])) {
+                $this->subordinates[$this->marketplaceMerchantId] = [];
+                $this->subordinates[$this->marketplaceMerchantId]['amount'] = 0;
+                $this->subordinates[$this->marketplaceMerchantId]['skus'] = [];
+            }
+
+            $this->subordinates[$this->marketplaceMerchantId]['amount'] += ($orderedShippingAmount * 100);
+        }
+
+        return $orderedShippingAmount;
     }
 
     /**
@@ -221,15 +266,17 @@ class SplitDataProvider
             ) {
                 if (isset($itemOptionsDataUnserialized['mpassignproduct_id'])
                     && $itemOptionsDataUnserialized['mpassignproduct_id'] != '0') {
+
                     $sellerId = $this->webkulHelperData->getSellerId(
                         $itemOptionsDataUnserialized['mpassignproduct_id']
                         , $product->getId()
                     );
 
                 } else {
+
                     $sellerId = $this->webkulHelperData->getSellerId(
                         ''
-                        , $product->getId());
+                        , $product->getRowId());
                 }
             }
         }
