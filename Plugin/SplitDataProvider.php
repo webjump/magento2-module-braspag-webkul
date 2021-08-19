@@ -309,7 +309,7 @@ class SplitDataProvider
         }
 
         if ($entityType === 'order') {
-            $itemQty = $item->getQtyOrdered()-$item->getQtyCanceled()-$item->getQtyShipped();
+            $itemQty = $item->getQtyOrdered()-$item->getQtyCanceled();
         }
 
         return $itemQty;
