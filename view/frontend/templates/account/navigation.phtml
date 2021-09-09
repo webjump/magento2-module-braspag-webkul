@@ -1,0 +1,32 @@
+<?php
+/**
+ * Webkul Software.
+ *
+ * @category  Webkul
+ * @package   Webkul_MpAssignProduct
+ * @author    Webkul
+ * @copyright Copyright (c) Webkul Software Private Limited (https://webkul.com)
+ * @license   https://store.webkul.com/license.html
+ */
+?>
+<?php
+    $_helper = $block->getHelperObject("marketplaceHelper");
+
+    $braspagPaymentSplitConfig = $block->getBraspagPaymentSplitConfig();
+
+    $isPartner= $_helper->isSeller();
+    $magentoCurrentUrl = $block->getCurrentUrl();
+    $isSellerGroup = $_helper->isSellerGroupModuleInstalled();
+    $marketplaceBraspagSellerFinancialUrl = $block->getUrl(
+        'braspagmarketplace/financial_profile/edit',
+        ['_secure' => $block->getRequest()->isSecure()]
+    );
+?>
+
+<li class="mp-assign-menu nav item <?= $magentoCurrentUrl == $marketplaceBraspagSellerFinancialUrl ? "current": ""; ?>">
+    <?php if ($isPartner && $braspagPaymentSplitConfig->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()): ?>
+        <a href="<?= $marketplaceBraspagSellerFinancialUrl ?>">
+            <?= /* @noEscape */ __('Financial') ?>
+        </a>
+    <?php endif; ?>
+</li>

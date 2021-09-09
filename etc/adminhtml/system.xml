@@ -1,0 +1,21 @@
+<?xml version="1.0" ?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="webjump_braspag">
+                <include path="Braspag_Webkul::system/paymentsplit.xml"/>
+            </group>
+        </section>
+
+        <section id="marketplace">
+            <group id="general_settings">
+                <field id="marketplacewebkul_payment_types_to_apply_webkul_commission" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="2" translate="label" type="multiselect">
+                    <label>Payment Methods to Apply Webkul Commission</label>
+                    <comment />
+                    <source_model>Webjump\BraspagPagador\Model\Source\AllPaymentMethods</source_model>
+                    <config_path>webjump_braspag/paymentsplit_marketplacewebkul/marketplacewebkul_payment_types_to_apply_webkul_commission</config_path>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
