@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Webkul Software.
+ *
+ * @category  Webkul
+ * @package   Webkul_MpAssignProduct
+ * @author    Webkul
+ * @copyright Copyright (c) Webkul Software Private Limited (https://webkul.com)
+ * @license   https://store.webkul.com/license.html
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <update handle="customer_account"/>
+    <head>
+        <css src="Webkul_MpAssignProduct::css/styles.css"/>
+        <css src="jquery/fileUploader/css/jquery.fileupload-ui.css"/>
+        <css src="Webkul_Marketplace::css/product.css"/>
+    </head>
+    <body>
+        <referenceBlock name="page.main.title">
+            <action method="setPageTitle">
+                <argument translate="true" name="title" xsi:type="string">Marketplace Braspag Financial Profile</argument>
+            </action>
+        </referenceBlock>
+        <referenceContainer name="content">
+            <block class="Braspag\Webkul\Block\Financial\Profile\Edit" name="braspag_financial_profile_edit" template="Braspag_Webkul::financial/profile/edit.phtml" cacheable="false"></block>
+        </referenceContainer>
+    </body>
+</page>
