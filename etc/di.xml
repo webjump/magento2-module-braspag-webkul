@@ -3,11 +3,17 @@
     <preference for="Webkul\Marketplace\Block\Adminhtml\Customer\Edit\Tabs" type="Braspag\Webkul\Block\Adminhtml\Customer\Edit\Tabs"/>
     <preference for="Webkul\Marketplace\Controller\Account\EditprofilePost" type="Braspag\Webkul\Controller\Account\EditprofilePost"/>
     <preference for="Webkul\Marketplace\Helper\Data" type="Braspag\Webkul\Helper\Data"/>
+    <preference for="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\ConfigInterface" type="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\Config"/>
 
     <type name="Webjump\BraspagPagador\Model\Source\PaymentSplitMarketplaceVendor">
-        <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceList"/>
+        <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceListPlugin"/>
     </type>
+
     <type name="Webjump\BraspagPagador\Model\SplitDataProvider">
-        <plugin name="braspagSplitDataProvider" type="Braspag\Webkul\Plugin\SplitDataProvider"/>
+        <plugin name="braspagSplitDataProvider" type="Braspag\Webkul\Plugin\SplitDataProviderPlugin"/>
+    </type>
+
+    <type name="Webkul\Marketplace\Observer\SalesOrderPlaceAfterObserver">
+        <plugin name="getCommission" type="Braspag\Webkul\Plugin\Observer\SalesOrderPlaceAfterObserverPlugin"/>
     </type>
 </config>

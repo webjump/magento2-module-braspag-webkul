@@ -1,12 +1,10 @@
 <?php
 /**
- * Webkul Software.
+ * @author      Webjump Core Team <dev@webjump.com.br>
+ * @copyright   2021 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
  *
- * @category  Webkul
- * @package   Webkul_Marketplace
- * @author    Webkul
- * @copyright Copyright (c) Webkul Software Private Limited (https://webkul.com)
- * @license   https://store.webkul.com/license.html
+ * @link        http://www.webjump.com.br
  */
 
 namespace Braspag\Webkul\Controller\Account;
