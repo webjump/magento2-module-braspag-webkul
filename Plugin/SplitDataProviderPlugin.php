@@ -478,7 +478,6 @@ class SplitDataProviderPlugin
      */
     protected function getSellerInfo($customerId)
     {
-        $result = [];
         $collection = $this->customerFactory->create()->getCollection();
         $joinTable = $this->resource->getTableName('marketplace_userdata');
         $sql = 'mpud.seller_id = e.entity_id';

@@ -3,7 +3,8 @@
         "column": {
             "braspag_subordinate_merchantid": true,
             "braspag_subordinate_mdr": true,
-            "braspag_subordinate_fee": true
+            "braspag_subordinate_fee": true,
+            "braspag_subordinate_status": true
         },
         "constraint": {
             "PRIMARY": true

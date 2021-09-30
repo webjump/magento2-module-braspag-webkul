@@ -4,5 +4,6 @@
         <column xsi:type="varchar" name="braspag_subordinate_merchantid" nullable="true" length="255" comment="Braspag Subordinate Merchantid" />
         <column xsi:type="varchar" name="braspag_subordinate_mdr" nullable="true" length="25" comment="Braspag Subordinate Mdr" />
         <column xsi:type="varchar" name="braspag_subordinate_fee" nullable="true" length="25" comment="Braspag Subordinate Fee" />
+        <column xsi:type="varchar" name="braspag_subordinate_status" nullable="true" length="25" comment="Braspag Subordinate Status" />
     </table>
 </schema>

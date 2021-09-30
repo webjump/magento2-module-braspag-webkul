@@ -110,14 +110,18 @@ class Edit extends \Magento\Framework\App\Action\Action
     {
         if (!$this->getBraspagPaymentSplitConfig()->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()) {
             $this->messageManager->addError(__('Invalid Route'));
-            return $this->resultRedirectFactory->create()->setPath('customer/account');
+            return $this->resultRedirectFactory->create()->setPath('customer/account', ['_secure' => $this->getRequest()->isSecure()]);
 
         } else {
+
             $resultPage = $this->_resultPageFactory->create();
+
             if ($this->_mpHelper->getIsSeparatePanel()) {
                 $resultPage->addHandle('mpassignproduct_product_edit_layout2');
             }
-            $resultPage->getConfig()->getTitle()->set(__('Marketplace Braspag Financial Profile'));
+
+            $resultPage->getConfig()->getTitle()->set(__('Marketplace Braspag Seller Financial Profile'));
+
             return $resultPage;
         }
 
