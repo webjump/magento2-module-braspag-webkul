@@ -20,11 +20,11 @@
     <body>
         <referenceBlock name="page.main.title">
             <action method="setPageTitle">
-                <argument translate="true" name="title" xsi:type="string">Marketplace Braspag Financial Profile</argument>
+                <argument translate="true" name="title" xsi:type="string">Marketplace Braspag Seller Financial Profile</argument>
             </action>
         </referenceBlock>
         <referenceContainer name="content">
-            <block class="Braspag\Webkul\Block\Financial\Profile\Edit" name="braspag_financial_profile_edit" template="Braspag_Webkul::financial/profile/edit.phtml" cacheable="false"></block>
+            <block class="Braspag\Webkul\Block\Financial\Profile\Edit" name="braspag_financial_profile_edit" template="Braspag_Webkul::financial/profile/edit.phtml" cacheable="false"/>
         </referenceContainer>
     </body>
 </page>

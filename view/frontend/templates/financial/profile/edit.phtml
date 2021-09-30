@@ -12,43 +12,405 @@
 <?php
     $productList = $block->getLayout()->createBlock(\Webkul\MpAssignProduct\Block\Product\ProductList::class);
     $helper = $productList->getHelperObject();
+
     $braspagPaymentSplitConfig = $block->getBraspagPaymentSplitConfig();
     $isPartner = $productList->getHelperObject('marketplaceHelper')->isSeller();
+    $sellerData = $productList->getHelperObject('marketplaceHelper')->getSellerData();
     $symbol = $productList->getHelperObject('marketplaceHelper')->getCurrencySymbol();
+
+    $sellerMerchantId = isset($sellerData->getData()[0]['braspag_subordinate_merchantid']) ? $sellerData->getData()[0]['braspag_subordinate_merchantid'] : null;
+
+    $subordinate = $block->getSubordinate();
+    $subordinateBillingAddress = $block->getSubordinateBillingAddress();
+
+    $disableInputs = false;
+
+    $subordinateDataFromBraspag = false;
+
+    $merchantId = "";
+    $blocked = false;
+    $merchantType = "";
+    $contactName = $subordinateBillingAddress->getName();
+    $contactPhone = preg_replace("/[^0-9]/", "", $subordinateBillingAddress->getTelephone());
+    $corporateName = $subordinate->getSocialName();
+    $documentNumber = $subordinate->getTaxvat();
+    $documentType = "Cnpj";
+    $birthdayDate = "";
+    $fancyName = $subordinate->getBusinessName();
+    $merchantCategoryCode = "";
+    $website = "";
+    $mailAddress = $subordinate->getEmail();
+    $holder = "";
+
+    $addressStreet = $subordinateBillingAddress->getStreetLine(1);
+    $addressNumber= $subordinateBillingAddress->getStreetLine(2);
+    $addressNeighborhood = $subordinateBillingAddress->getStreetLine(3);
+    $addressComplement = $subordinateBillingAddress->getStreetLine(4);
+    $addressCity = $subordinateBillingAddress->getCity();
+    $addressState = $subordinateBillingAddress->getRegionCode();
+    $addressZipCode = $subordinateBillingAddress->getPostcode();
+
+    $bankAccountBank = "";
+    $bankAccountBankAccountType = "";
+    $bankAccountNumber = "";
+    $bankAccountVerifierDigit = "";
+    $bankAccountOperation = "";
+    $bankAccountAgencyDigit = "";
+    $bankAccountAgencyNumber = "";
+    $bankAccountDocumentNumber = $subordinate->getTaxvat();
+    $bankAccountDocumentType = "Cnpj";
+
+    $requestedData = $block->getRequestedData();
+
+    if (!empty($requestedData) && !isset($requestedData['success'])) {
+
+        $contactName = $requestedData['subordinate_general_contact_name'];
+        $contactPhone = $requestedData['subordinate_general_contact_phone'];
+        $corporateName = $requestedData['subordinate_general_corporate_name'];
+        $documentNumber = $requestedData['subordinate_general_document_number'];
+        $documentType = $requestedData['subordinate_general_document_type'];
+        $fancyName = $requestedData['subordinate_general_fancy_name'];
+        $merchantCategoryCode = $requestedData['subordinate_general_merchant_category_code'];
+        $website = $requestedData['subordinate_general_website'];
+        $mailAddress = $requestedData['subordinate_general_mail_address'];
+
+        $addressStreet = $requestedData['subordinate_address_street'];
+        $addressNumber= $requestedData['subordinate_address_number'];
+        $addressNeighborhood = $requestedData['subordinate_address_neighborhood'];
+        $addressComplement = $requestedData['subordinate_address_complement'];
+        $addressCity = $requestedData['subordinate_address_city'];
+        $addressState = $requestedData['subordinate_address_state'];
+        $addressZipCode = $requestedData['subordinate_address_zipcode'];
+
+        $bankAccountBank = $requestedData['subordinate_bank_account_bank_code'];
+        $bankAccountBankAccountType = $requestedData['subordinate_bank_account_type'];
+        $bankAccountNumber = $requestedData['subordinate_bank_account_number'];
+        $bankAccountVerifierDigit = $requestedData['subordinate_bank_account_verifier_digit'];
+        $bankAccountOperation = $requestedData['subordinate_bank_account_operation'];
+        $bankAccountAgencyDigit = $requestedData['subordinate_bank_account_agency_digit'];
+        $bankAccountAgencyNumber = $requestedData['subordinate_bank_account_agency_number'];
+        $bankAccountDocumentNumber = $requestedData['subordinate_bank_account_document_number'];
+        $bankAccountDocumentType = $requestedData['subordinate_bank_account_document_type'];
+
+    } else {
+
+        $subordinateDataFromBraspag = $block->getSubordinateDataFromBraspag();
+
+        if ($subordinateDataFromBraspag && !empty($subordinateDataFromBraspag->getMerchantId())) {
+
+            $disableInputs = true;
+
+            $merchantId = $subordinateDataFromBraspag->getMerchantId();
+            $blocked = $subordinateDataFromBraspag->getBlocked();
+            $merchantType = $subordinateDataFromBraspag->getMerchantType();
+            $contactName = $subordinateDataFromBraspag->getContactName();
+            $contactPhone = $subordinateDataFromBraspag->getContactPhone();
+            $corporateName = $subordinateDataFromBraspag->getCorporateName();
+            $documentNumber = $subordinateDataFromBraspag->getDocumentNumber();
+            $documentType = $subordinateDataFromBraspag->getDocumentType();
+            $birthdayDate = $subordinateDataFromBraspag->getBirthdayDate();
+            $fancyName = $subordinateDataFromBraspag->getFancyName();
+            $merchantCategoryCode = $subordinateDataFromBraspag->getMerchantCategoryCode();
+            $website = $subordinateDataFromBraspag->getWebsite();
+            $mailAddress = $subordinateDataFromBraspag->getMailAddress();
+            $holder = $subordinateDataFromBraspag->getHolder();
+
+            $addressStreet = $subordinateDataFromBraspag->getAddressStreet();
+            $addressNumber= $subordinateDataFromBraspag->getAddressNumber();
+            $addressNeighborhood = $subordinateDataFromBraspag->getAddressNeighborhood();
+            $addressComplement = $subordinateDataFromBraspag->getAddressComplement();
+            $addressCity = $subordinateDataFromBraspag->getAddressCity();
+            $addressState = $subordinateDataFromBraspag->getAddressState();
+            $addressZipCode = $subordinateDataFromBraspag->getAddressZipCode();
+
+            $bankAccountBank = $subordinateDataFromBraspag->getBankAccountBank();
+            $bankAccountBankAccountType = $subordinateDataFromBraspag->getBankAccountBankAccountType();
+            $bankAccountNumber = $subordinateDataFromBraspag->getBankAccountNumber();
+            $bankAccountVerifierDigit = $subordinateDataFromBraspag->getBankAccountVerifierDigit();
+            $bankAccountAgencyDigit = $subordinateDataFromBraspag->getBankAccountAgencyDigit();
+            $bankAccountOperation = $subordinateDataFromBraspag->getBankAccountOperation();
+            $bankAccountAgencyNumber = $subordinateDataFromBraspag->getBankAccountAgencyNumber();
+            $bankAccountDocumentNumber = $subordinateDataFromBraspag->getBankAccountDocumentNumber();
+            $bankAccountDocumentType = $subordinateDataFromBraspag->getBankAccountDocumentType();
+        }
+    }
+
+    $status = __('Under Analysis');
+
+    if (isset($sellerData->getData()[0]['braspag_subordinate_status'])) {
+
+        switch ($sellerData->getData()[0]['braspag_subordinate_status']) {
+            case 'UnderAnalysis':
+                $status = __('Under Analysis');
+                    break;
+
+            case 'Approved':
+                $status = __('Approved');
+                    break;
+
+            case 'ApprovedWithRestriction':
+                $status = __('Approved With Restriction');
+                    break;
+
+            case 'Rejected':
+                $status = __('Rejected');
+                    break;
+        }
+    }
+
 ?>
 
-<?php if ($isPartner == 1 && $braspagPaymentSplitConfig->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()): ?>
+<?php if ($isPartner == 1
+    && $braspagPaymentSplitConfig->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()
+) : ?>
 
-    <form method="post" action="<?= /* @noEscape */ $block->getUrl('braspag/paymentSplit_sellerProfile/save'); ?>"
-    id="wk_mpassignproduct_form" enctype="multipart/form-data" data-mage-init='{"validation":{}}'>
+    <form method="post" action="<?= /* @noEscape */ $block->getUrl('braspagmarketplace/financial_profile/save'); ?>"
+    id="paymentSplit_subordinateProfile_form" enctype="multipart/form-data" data-mage-init='{"validation":{}}'>
         <input type="hidden" name="form_key" value="<?= /* @noEscape */ $block->getFormKey(); ?>">
-        <fieldset class="fieldset">
-            <?= /* @noEscape */ $block->getFormKeyBlockHtml(); ?>
+
+        <?php if (!empty($merchantId)) : ?>
+            <br/>
+            <div>
+                <span>
+                    <b><?= /* @noEscape */ __("Braspag Seller Profile ID"); ?>:</b>
+                    <?= /* @noEscape */ $merchantId; ?>
+                </span>
+            </div>
+            <br/>
+            <div>
+                <span>
+                    <b><?= /* @noEscape */ __("Braspag Seller Profile Status"); ?>:</b>
+                    <?= /* @noEscape */ $status; ?>
+                </span>
+            </div>
+            <br/>
+        <?php endif; ?>
+
+        <?= /* @noEscape */ $block->getFormKeyBlockHtml(); ?>
+        <fieldset  class="fieldset fieldset-braspag-financial">
             <legend class="legend">
-                <span><?= /* @noEscape */ __("Seller Bank Account"); ?></span>
+                <span><?= /* @noEscape */ __("Seller General Data"); ?></span>
             </legend>
 
             <div class="field required">
-                <label for="bank_code" class="label">
+                <label for="subordinate_general_corporate_name" class="label">
+                    <span><?= /* @noEscape */ __("Corporate Name");?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$corporateName" ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Corporate Name'); ?>" name="subordinate_general_corporate_name" id="subordinate_general_corporate_name" aria-required="true" maxlength="100" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_fancy_name" class="label">
+                    <span><?= /* @noEscape */ __("Fancy Name");?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$fancyName" ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Fancy Name'); ?>" name="subordinate_general_fancy_name" id="subordinate_general_fancy_name" aria-required="true" maxlength="50" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_document_type" class="label">
+                    <span><?= /* @noEscape */ __("Document Type"); ?></span>
+                </label>
+                <div class="control">
+                    <select aria-required="true" name="subordinate_general_document_type" id="subordinate_general_document_type"
+                            class="required-entry" title="<?= /* @noEscape */ __("Document Type"); ?>"
+                            data-validate="{'validate-select':true}" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                        <?php foreach (['Cpf' => 'CPF', 'Cnpj' => 'CNPJ'] as $value => $label): ?>
+                            <option value="<?= /* @noEscape */ $value; ?>" <?= $documentType == $value ? 'selected="selected"': ""?> >
+                                <?= /* @noEscape */ __($label); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_document_number" class="label">
+                    <span><?= /* @noEscape */ __("Document Number"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$documentNumber"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry validate-number"
+                           title="<?= /* @noEscape */ __('Document Number'); ?>" name="subordinate_general_document_number" id="subordinate_general_document_number" aria-required="true" maxlength="14" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_merchant_category_code" class="label">
+                    <span><?= /* @noEscape */ __("Merchant Category Code"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$merchantCategoryCode"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry validate-number"
+                           title="<?= /* @noEscape */ __('Merchant Category Code'); ?>" name="subordinate_general_merchant_category_code" id="subordinate_general_merchant_category_code" aria-required="true" maxlength="4" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_contact_name" class="label">
+                    <span><?= /* @noEscape */ __("Contact Name"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$contactName"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Contact Name'); ?>" name="subordinate_general_contact_name" id="subordinate_general_contact_name" aria-required="true" maxlength="100" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_contact_phone" class="label">
+                    <span><?= /* @noEscape */ __("Contact Phone"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$contactPhone"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry validate-number"
+                           title="<?= /* @noEscape */ __('Contact Phone'); ?>" name="subordinate_general_contact_phone" id="subordinate_general_contact_phone" aria-required="true"  maxlength="11" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                    <span>Ex: 11999999999</span>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_general_mail_address" class="label">
+                    <span><?= /* @noEscape */ __("Mail Address"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$mailAddress"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry validate-mail"
+                           title="<?= /* @noEscape */ __('Mail Address'); ?>" name="subordinate_general_mail_address" id="subordinate_general_mail_address" aria-required="true" maxlength="50" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="subordinate_general_website" class="label">
+                    <span><?= /* @noEscape */ __("Website"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$website"; ?>" type="text"
+                           data-validate="{required:false}" class="input-text"
+                           title="<?= /* @noEscape */ __('Website'); ?>" name="subordinate_general_website" id="subordinate_general_website" aria-required="false" maxlength="200" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset  class="fieldset fieldset-braspag-financial">
+
+            <legend class="legend">
+                <span><?= /* @noEscape */ __("Seller Address Data"); ?></span>
+            </legend>
+
+            <div class="field required">
+                <label for="subordinate_address_street" class="label">
+                    <span><?= /* @noEscape */ __("Address Street"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressStreet"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Address Street'); ?>" name="subordinate_address_street" id="subordinate_address_street" aria-required="true" maxlength="100" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_address_number" class="label">
+                    <span><?= /* @noEscape */ __("Number"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressNumber"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Number'); ?>" name="subordinate_address_number" id="subordinate_address_number" aria-required="true" maxlength="15" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field">
+                <label for="subordinate_address_complement" class="label">
+                    <span><?= /* @noEscape */ __("Complement"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressComplement"; ?>" type="text"
+                           data-validate="{required:false}" class="input-text"
+                           title="<?= /* @noEscape */ __('Complement'); ?>" name="subordinate_address_complement" id="subordinate_address_complement" aria-required="false" maxlength="80" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_address_neighborhood" class="label">
+                    <span><?= /* @noEscape */ __("Neighborhood"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressNeighborhood"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Neighborhood'); ?>" name="subordinate_address_neighborhood" id="subordinate_address_neighborhood" aria-required="true" maxlength="50" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_address_city" class="label">
+                    <span><?= /* @noEscape */ __("City"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressCity"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('City'); ?>" name="subordinate_address_city" id="subordinate_address_city" aria-required="true" maxlength="80" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_address_state" class="label">
+                    <span><?= /* @noEscape */ __("State"). " (" .__("UF").")"; ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressState"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('State'); ?>" name="subordinate_address_state" id="subordinate_address_state" aria-required="true" maxlength="2" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                </div>
+            </div>
+
+            <div class="field required">
+                <label for="subordinate_address_zipcode" class="label">
+                    <span><?= /* @noEscape */ __("Zip Code"); ?></span>
+                </label>
+                <div class="control">
+                    <input value="<?= /* @noEscape */ "$addressZipCode"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry validate-number"
+                           title="<?= /* @noEscape */ __('Zip Code'); ?>" name="subordinate_address_zipcode" id="subordinate_address_zipcode" aria-required="true" maxlength="9" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
+                    <span>Ex: 00000000</span>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset  class="fieldset fieldset-braspag-financial">
+
+            <legend class="legend">
+                <span><?= /* @noEscape */ __("Seller Bank Account Data"); ?></span>
+            </legend>
+
+            <div class="field required">
+                <label for="subordinate_bank_account_bank_code" class="label">
                     <span><?= /* @noEscape */ __("Bank Code");?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ "" ?>" type="text"
+                    <input value="<?= /* @noEscape */ "$bankAccountBank" ?>" type="text"
                     data-validate="{required:true}" class="input-text required-entry"
-                     title="<?= /* @noEscape */ __('Bank Code'); ?>" name="bank_code" id="bank_code" aria-required="true">
+                     title="<?= /* @noEscape */ __('Bank Code'); ?>" name="subordinate_bank_account_bank_code" id="subordinate_bank_account_bank_code" aria-required="true" maxlength="3" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <div class="field required">
-                <label for="bank_account_type" class="label">
+                <label for="subordinate_bank_account_type" class="label">
                     <span><?= /* @noEscape */ __("Bank Account Type"); ?></span>
                 </label>
                 <div class="control">
-                    <select aria-required="true" name="bank_account_type" id="bank_account_type"
+                    <select aria-required="true" name="subordinate_bank_account_type" id="subordinate_bank_account_type"
                     class="required-entry" title="<?= /* @noEscape */ __("Bank Account Type"); ?>"
-                    data-validate="{'validate-select':true}">
+                    data-validate="{'validate-select':true}" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                         <?php foreach (['CheckingAccount' => 'Conta corrente', 'SavingsAccount' => 'Conta poupança'] as $value => $label): ?>
-                            <option value="<?= /* @noEscape */ $value; ?>">
+                            <option value="<?= /* @noEscape */ $value; ?>" <?= $bankAccountBankAccountType == $value ? 'selected="selected"': ""?> >
                                 <?= /* @noEscape */ __($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -57,70 +419,70 @@
             </div>
 
             <div class="field required">
-                <label for="bank_account_number" class="label">
+                <label for="subordinate_bank_account_number" class="label">
                     <span><?= /* @noEscape */ __("Bank Account Number"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
-                           data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('BankVerifierDigit'); ?>" name="bank_account_number" id="bank_account_number" aria-required="true">
+                    <input value="<?= /* @noEscape */ "$bankAccountNumber"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Bank Account Number'); ?>" name="subordinate_bank_account_number" id="subordinate_bank_account_number" aria-required="true" maxlength="10" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <div class="field required">
-                <label for="bank_account_verifier_digit" class="label">
+                <label for="subordinate_bank_account_verifier_digit" class="label">
                     <span><?= /* @noEscape */ __("Bank Account Verifier Digit"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
-                           data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('Bank Account Verifier Digit'); ?>" name="bank_account_verifier_digit" id="bank_account_verifier_digit" aria-required="true">
+                    <input value="<?= /* @noEscape */ "$bankAccountVerifierDigit"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Bank Account Verifier Digit'); ?>" name="subordinate_bank_account_verifier_digit" id="subordinate_bank_account_verifier_digit" aria-required="true" maxlength="1" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
-            <div class="field required">
-                <label for="bank_account_operation" class="label">
+            <div class="field">
+                <label for="subordinate_bank_account_operation" class="label">
                     <span><?= /* @noEscape */ __("Bank Account Operation"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
-                           data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('Bank Account Operation'); ?>" name="bank_account_operation" id="bank_account_operation" aria-required="true">
+                    <input value="<?= /* @noEscape */ "$bankAccountOperation"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Bank Account Operation'); ?>" name="subordinate_bank_account_operation" id="subordinate_bank_account_operation" aria-required="false" maxlength="10" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <div class="field required">
-                <label for="bank_agency_number" class="label">
+                <label for="subordinate_bank_account_agency_number" class="label">
                     <span><?= /* @noEscape */ __("Bank Agency Number"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
+                    <input value="<?= /* @noEscape */ "$bankAccountAgencyNumber"; ?>" type="text"
                            data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('Bank Agency Number'); ?>" name="bank_agency_number" id="bank_agency_number" aria-required="true">
+                           title="<?= /* @noEscape */ __('Bank Agency Number'); ?>" name="subordinate_bank_account_agency_number" id="subordinate_bank_account_agency_number" aria-required="true" maxlength="15" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <div class="field required">
-                <label for="bank_agency_digit" class="label">
+                <label for="subordinate_bank_account_agency_digit" class="label">
                     <span><?= /* @noEscape */ __("Bank Agency Digit"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
-                           data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('Bank Agency Digit'); ?>" name="bank_agency_digit" id="bank_agency_digit" aria-required="true">
+                    <input value="<?= /* @noEscape */ "$bankAccountAgencyDigit"; ?>" type="text"
+                           data-validate="{required:true}" class="input-text required-entry"
+                           title="<?= /* @noEscape */ __('Bank Agency Digit'); ?>" name="subordinate_bank_account_agency_digit" id="subordinate_bank_account_agency_digit" aria-required="true" maxlength="1" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <div class="field required">
-                <label for="bank_account_owner_document_type" class="label">
-                    <span><?= /* @noEscape */ __("Bank Account Owner Document Type"); ?></span>
+                <label for="subordinate_bank_account_document_type" class="label">
+                    <span><?= /* @noEscape */ __("Bank Account Document Type"); ?></span>
                 </label>
                 <div class="control">
-                    <select aria-required="true" name="bank_account_owner_document_type" id="bank_account_owner_document_type"
-                            class="required-entry" title="<?= /* @noEscape */ __("Bank Account Owner Document Type"); ?>"
-                            data-validate="{'validate-select':true}">
+                    <select aria-required="true" name="subordinate_bank_account_document_type" id="subordinate_bank_account_document_type"
+                            class="required-entry" title="<?= /* @noEscape */ __("Bank Account Document Type"); ?>"
+                            data-validate="{'validate-select':true}" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                         <?php foreach (['Cpf' => 'CPF', 'Cnpj' => 'CNPJ'] as $value => $label): ?>
-                            <option value="<?= /* @noEscape */ $value; ?>">
+                            <option value="<?= /* @noEscape */ $value; ?>" <?= $bankAccountDocumentType == $value ? 'selected="selected"': ""?> >
                                 <?= /* @noEscape */ __($label); ?>
                             </option>
                         <?php endforeach; ?>
@@ -129,32 +491,43 @@
             </div>
 
             <div class="field required">
-                <label for="bank_account_owner_document_number" class="label">
-                    <span><?= /* @noEscape */ __("Bank Account Owner Document Number"); ?></span>
+                <label for="subordinate_bank_account_document_number" class="label">
+                    <span><?= /* @noEscape */ __("Bank Account Document Number"); ?></span>
                 </label>
                 <div class="control">
-                    <input value="<?= /* @noEscape */ ""; ?>" type="text"
+                    <input value="<?= /* @noEscape */ "$bankAccountDocumentNumber"; ?>" type="text"
                            data-validate="{required:true}" class="input-text required-entry validate-number"
-                           title="<?= /* @noEscape */ __('Bank Account Owner Document Number'); ?>" name="bank_account_owner_document_number" id="bank_account_owner_document_number" aria-required="true">
+                           title="<?= /* @noEscape */ __('Bank Account Document Number'); ?>" name="subordinate_bank_account_document_number" id="subordinate_bank_account_document_number" aria-required="true" maxlength="15" <?= $disableInputs ? 'disabled="disabled"' : "" ?>>
                 </div>
             </div>
 
             <?= $block->getChildHtml(); ?>
-            <div class="field required">
+        </fieldset>
+
+        <?php if (empty($sellerMerchantId)) : ?>
+            <div class="field">
                 <div class="control">
                     <button class="button wk-product-save-btn" type="submit">
                         <span><span><?= /* @noEscape */ __("Save"); ?></span></span>
                     </button>
                 </div>
             </div>
-        </fieldset>
+        <?php endif; ?>
+
     </form>
-<?php elseif ($braspagPaymentSplitConfig->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()): ?>
+
+<?php elseif ($subordinateDataFromBraspag): ?>
+    <h2 class="wk-mp-error-msg">
+        <?= /* @noEscape */ __("Connection Error with Braspag."); ?>
+    </h2>
+
+<?php elseif (!$braspagPaymentSplitConfig->getPaymentSplitMarketPlaceGeneralBraspagFinancialPageEnabled()): ?>
     <h2 class="wk-mp-error-msg">
         <?= /* @noEscape */ __("To Become Seller Please Contact to Admin."); ?>
     </h2>
+
 <?php else: ?>
     <h2 class="wk-mp-error-msg">
-        <?= /* @noEscape */ __("Invalid Page."); ?>
+        <?= /* @noEscape */ __("Connection Error with Braspag."); ?>
     </h2>
 <?php endif; ?>
