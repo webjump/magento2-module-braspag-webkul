@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
     <group id="webjump_braspag_paymentsplit_marketplacewebkul" translate="label comment" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="20">
-        <label>Marketplace Vendor Config</label>
+        <label>Marketplace Vendor Webkul Config</label>
 
         <field id="marketplacewebkul_payment_types_to_apply_braspag_commission" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="10" translate="label" type="multiselect">
             <label>Payment Types to Apply Braspag Commission</label>

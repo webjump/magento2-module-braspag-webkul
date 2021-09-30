@@ -13,7 +13,23 @@
         <plugin name="braspagSplitDataProvider" type="Braspag\Webkul\Plugin\SplitDataProviderPlugin"/>
     </type>
 
-    <type name="Webkul\Marketplace\Observer\SalesOrderPlaceAfterObserver">
-        <plugin name="getCommission" type="Braspag\Webkul\Plugin\Observer\SalesOrderPlaceAfterObserverPlugin"/>
-    </type>
+    <!--<type name="Webkul\Marketplace\Observer\SalesOrderPlaceAfterObserver">-->
+        <!--<plugin name="getCommission" type="Braspag\Webkul\Plugin\Observer\SalesOrderPlaceAfterObserverPlugin"/>-->
+    <!--</type>-->
+
+    <virtualType name="BraspagTransactionSplitPaymentCreateSubordinateCommandResponseHandlerPool" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="split" xsi:type="string">Braspag\Webkul\Gateway\Transaction\PaymentSplit\Resource\CreateSubordinate\Response\CreateSubordinateHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="BraspagTransactionSplitPaymentGetSubordinateCommandResponseHandlerPool" type="Magento\Payment\Gateway\Response\HandlerChain">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="split" xsi:type="string">Braspag\Webkul\Gateway\Transaction\PaymentSplit\Resource\GetSubordinate\Response\GetSubordinateHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
 </config>

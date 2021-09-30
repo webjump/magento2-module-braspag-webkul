@@ -66,6 +66,8 @@ class Tabs extends Generic implements TabInterface
      */
     protected $sellerModel;
 
+    protected $braspagSubordinateStatus;
+
     /**
      * @param \Magento\Backend\Block\Template\Context $context
      * @param \Magento\Framework\Registry             $registry
@@ -88,7 +90,8 @@ class Tabs extends Generic implements TabInterface
         \Magento\Store\Ui\Component\Listing\Column\Store\Options $options = null,
         MpHelper $mpHelper = null,
         SellerFactory $sellerModel = null,
-        array $data = []
+        array $data = [],
+        \Webjump\BraspagPagador\Model\Source\BraspagSubordinateStatus $braspagSubordinateStatus
     ) {
         $this->_coreRegistry = $registry;
         $this->_systemStore = $systemStore;
@@ -105,6 +108,7 @@ class Tabs extends Generic implements TabInterface
         $this->sellerModel = $sellerModel ?: \Magento\Framework\App\ObjectManager::getInstance()
             ->create(SellerFactory::class);
         parent::__construct($context, $registry, $formFactory, $data);
+        $this->braspagSubordinateStatus = $braspagSubordinateStatus;
     }
 
     public function getWysiwygConfig()
@@ -680,6 +684,19 @@ class Tabs extends Generic implements TabInterface
                 'label' => __('Braspag Subordinate Fee'),
                 'title' => __('Braspag Subordinate Fee'),
                 'value' => $partner['braspag_subordinate_fee'],
+            ]
+        );
+
+        $fieldset->addField(
+            'braspag_subordinate_status',
+            'select',
+            [
+                'name' => 'braspag_subordinate_status',
+                'values' => $this->braspagSubordinateStatus->toOptionArray(),
+                'data-form-part' => $this->getData('target_form'),
+                'label' => __('Braspag Subordinate Status'),
+                'title' => __('Braspag Subordinate Status'),
+                'value' => $partner['braspag_subordinate_status'],
             ]
         );
 

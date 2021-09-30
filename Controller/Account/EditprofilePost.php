@@ -524,6 +524,11 @@ class EditprofilePost extends Action
                     $value = $this->helper->validateXssString($value);
                     $fields[$code] = $value;
                     break;
+                case 'braspag_subordinate_status':
+                    $value = preg_replace("/<script.*?\/script>/s", "", $value) ? : $value;
+                    $value = $this->helper->validateXssString($value);
+                    $fields[$code] = $value;
+                    break;
                 case 'background_width':
                     if (trim($value) != '' &&
                         strlen($value) != 6 &&
