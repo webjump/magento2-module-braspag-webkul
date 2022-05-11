@@ -32,4 +32,5 @@
 "Merchant 'DocumentNumber' is an invalid CNPJ number","O número do documento CNPJ da Loja é inválido"
 "'BankAccount.DocumentNumber' is an invalid CNPJ number","O número do documento CNPJ da conta é inválido"
 "'BankAccount.DocumentNumber' is an invalid CPF number","O número do documento CPF da conta é inválido"
-
+"without additional", "sem acréscimo"
+"with additional of", "acréscimo de"
