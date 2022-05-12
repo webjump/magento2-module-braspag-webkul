@@ -4,6 +4,9 @@
     <preference for="Webkul\Marketplace\Controller\Account\EditprofilePost" type="Braspag\Webkul\Controller\Account\EditprofilePost"/>
     <preference for="Webkul\Marketplace\Helper\Data" type="Braspag\Webkul\Helper\Data"/>
     <preference for="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\ConfigInterface" type="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\Config"/>
+    
+    <preference for="Webjump\BraspagPagador\Gateway\Transaction\Base\Resource\Installments\Installment" type="Braspag\Webkul\Gateway\Transaction\Base\Resource\Installments\Installment"/>
+    <preference for="Webjump\BraspagPagador\Model\Installments" type="Braspag\Webkul\Model\Installments"/>
 
     <type name="Webjump\BraspagPagador\Model\Source\PaymentSplitMarketplaceVendor">
         <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceListPlugin"/>
