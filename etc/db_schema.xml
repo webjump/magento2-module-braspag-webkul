@@ -6,4 +6,10 @@
         <column xsi:type="varchar" name="braspag_subordinate_fee" nullable="true" length="25" comment="Braspag Subordinate Fee" />
         <column xsi:type="varchar" name="braspag_subordinate_status" nullable="true" length="25" comment="Braspag Subordinate Status" />
     </table>
+    <table name="quote" resource="default" engine="innodb">
+        <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" nullable="false" comment="Braspag Fees"/>
+    </table>
+    <table name="sales_order" resource="default" engine="innodb">
+        <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" nullable="false" comment="Braspag Fees"/>
+    </table>
 </schema>
