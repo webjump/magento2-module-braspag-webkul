@@ -9,5 +9,15 @@
         "constraint": {
             "PRIMARY": true
         }
+    },
+    "quote": {
+        "column": {
+            "braspag_fees": true
+        }
+    },
+    "sales_order": {
+        "column": {
+            "braspag_fees": true
+        }
     }
 }

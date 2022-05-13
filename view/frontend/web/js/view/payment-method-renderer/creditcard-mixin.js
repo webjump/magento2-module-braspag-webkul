@@ -34,10 +34,6 @@ define([
             this.totals(totals)
         },
 
-        getTotalLabel: function() {
-            return 'Total: ' + priceUtils.formatPrice(this.totals().grand_total)
-        },
-
         getCcInstallments: function() {
             var self = this;
 
