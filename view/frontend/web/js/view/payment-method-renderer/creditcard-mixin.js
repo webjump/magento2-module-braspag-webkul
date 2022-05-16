@@ -40,14 +40,12 @@ define([
             fullScreenLoader.startLoader();
             $.when(
                 installments(),
-                getTotalsAction([], )
-            ).done(function (transport, totals) {
-                const total = totals[0].grand_total
+            ).done(function (transport) {
                 self.allInstallments.removeAll();
 
-                _.map(transport[0], function (value, key) {
+                _.map(transport, function (value, key) {
                     const totalPrice = value.price * value.id
-                    const interestLabel = value.interest ? $t("with additional of") + ' ' + parseInt((totalPrice / total - 1) * 100) + '%' : $t("without additional") 
+                    const interestLabel = value.interest ? $t("with interest*") : $t("without interest") 
                     self.allInstallments.push({
                         'value': value.id,
                         'installments': `${value.id}x ${priceUtils.formatPrice(value.price)} ${interestLabel} (${priceUtils.formatPrice(totalPrice)})`,
