@@ -107,6 +107,6 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
      */
     private function totalInterestRate($total, $totalWithInterestRate)
     {
-        return (($totalWithInterestRate/ $total) - 1) * 100;
+        return ($totalWithInterestRate -  $total);
     }
 }
