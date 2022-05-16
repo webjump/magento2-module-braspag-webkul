@@ -6,4 +6,11 @@
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="checkout_submit_before">
+        <observer name="braspag_webkul_marketplace_add_additional_info_sales_order_place_before_observer"
+        instance="Braspag\Webkul\Observer\AddBraspagFeesToQuoteObserver" />
+    </event>
+    <event name="sales_model_service_quote_submit_before">
+        <observer instance="Braspag\Webkul\Observer\AddBraspagFeesToOrderObserver" name="braspag_webkul_add_braspag_fees_to_order"/>
+    </event>
 </config>
