@@ -10,8 +10,21 @@
 
     <preference for="Magento\Sales\Block\Order\Totals"
         type="Braspag\Webkul\Block\Order\Totals"/>
+<<<<<<< Updated upstream
     <preference for="Magento\Sales\Model\Order"
         type="Braspag\Webkul\Model\Order"/>
+=======
+    <preference for="Magento\Sales\Block\Adminhtml\Order\Totals"
+        type="Braspag\Webkul\Block\Adminhtml\Order\Totals"/>
+    <preference for="Magento\Sales\Block\Adminhtml\Order\Creditmemo\Totals"
+        type="Braspag\Webkul\Block\Adminhtml\Order\Creditmemo\Totals"/>
+    <preference for="Magento\Sales\Block\Adminhtml\Order\Invoice\Totals"
+        type="Braspag\Webkul\Block\Adminhtml\Order\Invoice\Totals"/>
+    <preference for="Magento\Sales\Block\Order\Invoice\Totals"
+        type="Braspag\Webkul\Block\Order\Invoice\Totals"/>
+    <preference for="Magento\Sales\Block\Order\Creditmemo\Totals"
+        type="Braspag\Webkul\Block\Order\Creditmemo\Totals"/>
+>>>>>>> Stashed changes
 
     <type name="Webjump\BraspagPagador\Model\Source\PaymentSplitMarketplaceVendor">
         <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceListPlugin"/>
