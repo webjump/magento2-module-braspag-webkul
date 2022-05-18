@@ -74,15 +74,15 @@ class Totals extends \Magento\Sales\Block\Order\Totals
          * Add Braspag Fees
          */
         if ((double)$this->getSource()->getBraspagFees() != 0) {
-        $this->_totals['braspag_fees'] = new \Magento\Framework\DataObject(
-            [
-                'code' => 'braspag_fees',
-                'field' => 'braspag_fees',
-                'strong' => true,
-                'value' => $source->getBraspagFees(),
-                'label' => __('Fees of the Card'),
-            ]
-        );
+            $this->_totals['braspag_fees'] = new \Magento\Framework\DataObject(
+                [
+                    'code' => 'braspag_fees',
+                    'field' => 'braspag_fees',
+                    'strong' => false,
+                    'value' => $source->getBraspagFees(),
+                    'label' => __('Fees of the Card'),
+                ]
+            );
         }
 
         $this->_totals['grand_total'] = new \Magento\Framework\DataObject(
