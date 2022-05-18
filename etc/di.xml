@@ -8,8 +8,6 @@
     <preference for="Webjump\BraspagPagador\Gateway\Transaction\Base\Resource\Installments\Installment" type="Braspag\Webkul\Gateway\Transaction\Base\Resource\Installments\Installment"/>
     <preference for="Webjump\BraspagPagador\Model\Installments" type="Braspag\Webkul\Model\Installments"/>
 
-    <preference for="Magento\Sales\Block\Order\Totals"
-        type="Braspag\Webkul\Block\Order\Totals"/>
     <preference for="Magento\Sales\Model\Order"
         type="Braspag\Webkul\Model\Order"/>
     <preference for="Magento\Sales\Block\Adminhtml\Order\Totals"
