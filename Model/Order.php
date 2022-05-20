@@ -15,15 +15,15 @@ class Order extends \Magento\Sales\Model\Order
     /*
      * Braspag Fees
      */
-    const BRASPAG_FEES = 'braspag_fees';
+    const BRASPAG_FEES_AMOUNT = 'braspag_fees_amount';
 
     /**
      * Return braspagg_fee
      *
      * @return float
      */
-    public function getBraspagFees()
+    public function getBraspagFeesAmount()
     {
-        return $this->getData(self::BRASPAG_FEES);
+        return $this->getData(self::BRASPAG_FEES_AMOUNT);
     }
 }

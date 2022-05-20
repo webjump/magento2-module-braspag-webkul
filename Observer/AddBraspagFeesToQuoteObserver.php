@@ -20,7 +20,7 @@ use Webjump\BraspagPagador\Gateway\Transaction\Base\Config\InstallmentsConfigInt
 class AddBraspagFeesToQuoteObserver implements ObserverInterface
 {
     /** @var string */
-    const PAYMENT_METHOD = 'braspag_pagador_creditcard';
+    const CC_PAYMENT_METHOD = 'braspag_pagador_creditcard';
 
     /** @var InstallmentsConfigInterface */
     private $installmentsConfig;
@@ -53,35 +53,60 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
         $quote = $observer->getData('quote');
         $payment = $quote
             ->getPayment();
-        $ccInstallments = $payment
-            ->getData('additional_information')['cc_installments'];
         $method = $payment
             ->getData('method');
 
         if ($this->installmentsConfig->isActive()
-            && $method == self::PAYMENT_METHOD
-            && $ccInstallments > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
+            && $method == self::CC_PAYMENT_METHOD
+            && $this->getCCInstallments($payment) > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
             && (bool) $interestRate = $this->installmentsConfig->getInterestRate()
         ) {
-            $newBaseGrandTotal = $this
-                ->calcTotalPriceWithInterest($ccInstallments, $quote->getBaseGrandTotal(), $interestRate);
-            $newGrandTotal = $this
-                ->calcTotalPriceWithInterest($ccInstallments, $quote->getGrandTotal(), $interestRate);
-            $newBaseSubtotal = $this
-                ->calcTotalPriceWithInterest($ccInstallments, $quote->getBaseSubtotal(), $interestRate);
-            $newSubtotal = $this
-                ->calcTotalPriceWithInterest($ccInstallments, $quote->getSubtotal(), $interestRate);
-            $braspagFees = $this
-                ->totalInterestRate($quote->getBaseGrandTotal(), $newBaseGrandTotal);
+            list($newBaseGrandTotal, $newGrandTotal) = $this
+                ->getNewPricesWithBraspagFees($this->getCCInstallments($payment), $quote, $interestRate);
+            list($braspagFees, $braspagFeesAmount) = $this
+                ->getTotalsInterestRate($quote->getBaseGrandTotal(), $newBaseGrandTotal);
+
             $quote->setBaseGrandTotal($newBaseGrandTotal)
                 ->setGrandTotal($newGrandTotal)
-                ->setBaseSubtotal($newBaseSubtotal)
-                ->setSubtotal($newSubtotal)
-                ->setBraspagFees($braspagFees);
+                ->setBraspagFees($braspagFees)
+                ->setBraspagFeesAmount($braspagFeesAmount);
+
             $quote->collectTotals();
             $this->quoteRepository
                 ->save($quote);
         }
+    }
+
+    /**
+     * Get credit card instalments
+     *
+     * @param mixed $payment
+     * @return void
+     */
+    private function getCCInstallments($payment)
+    {
+        return $payment
+            ->getData('additional_information')['cc_installments'];
+    }
+
+    /**
+     * Get all the new prices according with braspag fees
+     *
+     * @param mixed $ccInstallments
+     * @param mixed $quote
+     * @param mixed $interestRate
+     * @return void
+     */
+    private function getNewPricesWithBraspagFees($ccInstallments, $quote, $interestRate)
+    {
+        $newBaseGrandTotal = $this
+            ->calcTotalPriceWithInterest($ccInstallments, $quote->getBaseGrandTotal(), $interestRate);
+        $newGrandTotal = $this
+            ->calcTotalPriceWithInterest($ccInstallments, $quote->getGrandTotal(), $interestRate);
+        return [
+            $newBaseGrandTotal,
+            $newGrandTotal
+        ];
     }
 
     /**
@@ -99,14 +124,19 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
     }
 
     /**
-     * Total Interest Rate
+     * Get interest rate and interest rate amount
      *
      * @param mixed $total
      * @param mixed $totalWithInterestRate
      * @return void
      */
-    private function totalInterestRate($total, $totalWithInterestRate)
+    private function getTotalsInterestRate($total, $totalWithInterestRate)
     {
-        return ($totalWithInterestRate -  $total);
+        $totalInterestRate = (($totalWithInterestRate/ $total) - 1) * 100;
+        $totalInterestRateAmount = ($totalWithInterestRate -  $total);
+        return [
+            $totalInterestRate,
+            $totalInterestRateAmount
+        ];
     }
 }

@@ -1,0 +1,24 @@
+<!--
+/**
+ *
+ * @author      Webjump Core Team <dev@webjump.com.br>
+ * @copyright   2022 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
+ * @link        http://www.webjump.com.br
+ *
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Api/etc/extension_attributes.xsd">
+    <extension_attributes for="Magento\Quote\Api\Data\CartInterface">
+        <attribute code="braspag_fees" type="string" />
+        <attribute code="braspag_fees_amount" type="string" />
+    </extension_attributes>
+    <extension_attributes for="Magento\Sales\Api\Data\OrderInterface">
+        <attribute code="braspag_fees" type="string" />
+        <attribute code="braspag_fees_amount" type="string" />
+    </extension_attributes>
+    <extension_attributes for="Magento\Sales\Api\Data\OrderItemInterface">
+        <attribute code="braspag_fees" type="string" />
+        <attribute code="braspag_fees_amount" type="string" />
+    </extension_attributes>
+</config>

@@ -6,7 +6,6 @@
 
 namespace Braspag\Webkul\Block\Order\Creditmemo;
 
-
 /**
  * @api
  * @since 100.0.2
@@ -26,11 +25,11 @@ class Totals extends \Magento\Sales\Block\Order\Creditmemo\Totals
         /**
          * Add Braspag Fees
          */
-        if ((double)$this->getSource()->getOrder()->getBraspagFees() != 0) {
+        if ((double)$this->getSource()->getOrder()->getBraspagFeesAmount() != 0) {
             $total = new \Magento\Framework\DataObject(
                 [
-                    'code' => 'braspag_fees',
-                    'value' => $this->getSource()->getOrder()->getBraspagFees(),
+                    'code' => 'braspag_fees_amount',
+                    'value' => $this->getSource()->getOrder()->getBraspagFeesAmount(),
                     'label' => __('Fees of the Card'),
                 ]
             );
@@ -57,7 +56,7 @@ class Totals extends \Magento\Sales\Block\Order\Creditmemo\Totals
             );
             $this->addTotal($total);
         }
-        
+
         return $this;
     }
 }

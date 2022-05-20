@@ -25,13 +25,13 @@ class Totals extends \Magento\Sales\Block\Adminhtml\Order\Creditmemo\Totals
         /**
          * Add Braspag Fees
         */
-        if ((double)$this->getSource()->getOrder()->getBraspagFees() != 0) {
+        if ((double)$this->getSource()->getOrder()->getBraspagFeesAmount() != 0) {
             $this->addTotal(
                 new \Magento\Framework\DataObject(
                     [
-                        'code' => 'braspag_fees',
-                        'value' => $this->getSource()->getOrder()->getBraspagFees(),
-                        'base_value' => $this->getSource()->getOrder()->getBraspagFees(),
+                        'code' => 'braspag_fees_amount',
+                        'value' => $this->getSource()->getOrder()->getBraspagFeesAmount(),
+                        'base_value' => $this->getSource()->getOrder()->getBraspagFeesAmount(),
                         'label' => __('Fees of the Card'),
                     ]
                 )
