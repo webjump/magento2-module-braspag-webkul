@@ -12,12 +12,20 @@
     },
     "quote": {
         "column": {
-            "braspag_fees": true
+            "braspag_fees": true,
+            "braspag_fees_amount": true
         }
     },
     "sales_order": {
         "column": {
-            "braspag_fees": true
+            "braspag_fees": true,
+            "braspag_fees_amount": true
+        }
+    },
+    "sales_order_item": {
+        "column": {
+            "braspag_fees": true,
+            "braspag_fees_amount": true
         }
     }
 }

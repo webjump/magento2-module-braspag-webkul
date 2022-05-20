@@ -18,6 +18,7 @@ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Payment;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Item;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Webjump\BraspagPagador\Gateway\Transaction\Base\Config\InstallmentsConfigInterface;
@@ -39,6 +40,9 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
 
     /** @var MockObject | Payment */
     private $paymentMock;
+
+    /** @var MockObject | Item */
+    private $orderItemMock;
 
     /** @var Observer */
     private $instance;
@@ -77,12 +81,12 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getData')
             ->withConsecutive(
-                ['additional_information'],
-                ['method']
+                ['method'],
+                ['additional_information']
             )
             ->willReturnOnConsecutiveCalls(
-                ['cc_installments' => 4],
-                'braspag_pagador_creditcard'
+                'braspag_pagador_creditcard',
+                ['cc_installments' => 4]
             );
 
         $this->quoteMock
@@ -115,14 +119,6 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->willReturn(3015);
         $this->quoteMock
             ->expects($this->exactly(1))
-            ->method('getBaseSubtotal')
-            ->willReturn(3000);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getSubtotal')
-            ->willReturn(3000);
-        $this->quoteMock
-            ->expects($this->exactly(1))
             ->method('getBraspagFees')
             ->willReturn(26.2232);
 
@@ -136,15 +132,27 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->willReturnSelf();
         $this->orderMock
             ->expects($this->exactly(1))
-            ->method('setBaseSubtotal')
-            ->willReturnSelf();
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('setSubtotal')
-            ->willReturnSelf();
-        $this->orderMock
-            ->expects($this->exactly(1))
             ->method('setBraspagFees')
+            ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('getBraspagFees')
+            ->willReturn(20.0);
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('getItems')
+            ->willReturn([$this->orderItemMock]);
+        $this->orderItemMock
+            ->expects($this->exactly(1))
+            ->method('getBaseRowTotal')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(2))
+            ->method('getRowTotal')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(4))
+            ->method('setData')
             ->willReturnSelf();
 
         $this->assertNull($this->instance->execute($this->observerEventMock));
@@ -186,16 +194,34 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
                     'setBaseGrandTotal',
                     'setGrandTotal',
                     'setBaseSubtotal',
-                    'setSubtotal'
+                    'setSubtotal',
+                    'getItems'
                 ]
             )
             ->addMethods(
                 [
-                    'setBraspagFees'
+                    'setBraspagFees',
+                    'getBraspagFees'
                 ]
             )
             ->getMock();
         $this->paymentMock = $this->createMock(Payment::class);
+        $this->orderItemMock = $this
+            ->getMockBuilder(Item::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(
+                [
+                    'getBaseRowTotal',
+                    'getRowTotal',
+                    'setData'
+                ]
+            )
+            // ->addMethods(
+            //     [
+            //         'setBraspagFees'
+            //     ]
+            // )
+            ->getMock();
     }
 
     /**
