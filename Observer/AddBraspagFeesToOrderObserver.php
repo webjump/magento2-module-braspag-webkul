@@ -79,7 +79,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
     private function getCCInstalments($payment)
     {
         return $payment
-            ->getData('additional_information')['cc_installments'];
+            ->getData('additional_information')['cc_installments'] ?? 1;
     }
 
     /**

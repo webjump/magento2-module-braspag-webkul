@@ -86,7 +86,7 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
     private function getCCInstallments($payment)
     {
         return $payment
-            ->getData('additional_information')['cc_installments'];
+            ->getData('additional_information')['cc_installments'] ?? 1;
     }
 
     /**
