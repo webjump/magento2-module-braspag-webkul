@@ -72,12 +72,12 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getData')
             ->withConsecutive(
-                ['additional_information'],
-                ['method']
+                ['method'],
+                ['additional_information']
             )
             ->willReturnOnConsecutiveCalls(
-                ['cc_installments' => 4],
-                'braspag_pagador_creditcard'
+                'braspag_pagador_creditcard',
+                ['cc_installments' => 4]
             );
 
         $this->installmentsConfigMock
@@ -105,28 +105,11 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
             ->willReturn(3015);
         $this->quoteMock
             ->expects($this->exactly(1))
-            ->method('getBaseSubtotal')
-            ->willReturn(3000);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getSubtotal')
-            ->willReturn(3000);
-
-        $this->quoteMock
-            ->expects($this->exactly(1))
             ->method('setBaseGrandTotal')
             ->willReturnSelf();
         $this->quoteMock
             ->expects($this->exactly(1))
             ->method('setGrandTotal')
-            ->willReturnSelf();
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('setBaseSubtotal')
-            ->willReturnSelf();
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('setSubtotal')
             ->willReturnSelf();
         $this->quoteMock
             ->expects($this->exactly(1))
@@ -167,12 +150,8 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
                 [
                     'getBaseGrandTotal',
                     'getGrandTotal',
-                    'getBaseSubtotal',
-                    'getSubtotal',
                     'setBaseGrandTotal',
                     'setGrandTotal',
-                    'setBaseSubtotal',
-                    'setSubtotal',
                     'setBraspagFees',
                 ]
             )

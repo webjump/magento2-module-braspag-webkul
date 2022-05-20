@@ -58,11 +58,11 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
 
         if ($this->installmentsConfig->isActive()
             && $method == self::CC_PAYMENT_METHOD
-            && $this->getCCInstallments($payment) > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
+            && ($ccInstallments = $this->getCCInstallments($payment)) > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
             && (bool) $interestRate = $this->installmentsConfig->getInterestRate()
         ) {
             list($newBaseGrandTotal, $newGrandTotal) = $this
-                ->getNewPricesWithBraspagFees($this->getCCInstallments($payment), $quote, $interestRate);
+                ->getNewPricesWithBraspagFees($ccInstallments, $quote, $interestRate);
             list($braspagFees, $braspagFeesAmount) = $this
                 ->getTotalsInterestRate($quote->getBaseGrandTotal(), $newBaseGrandTotal);
 
