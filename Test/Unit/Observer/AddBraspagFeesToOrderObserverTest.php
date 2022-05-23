@@ -121,7 +121,10 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->expects($this->exactly(1))
             ->method('getBraspagFees')
             ->willReturn(26.2232);
-
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('getBraspagFeesAmount')
+            ->willReturn(26.2232);
         $this->orderMock
             ->expects($this->exactly(1))
             ->method('setBaseGrandTotal')
@@ -136,25 +139,8 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->willReturnSelf();
         $this->orderMock
             ->expects($this->exactly(1))
-            ->method('getBraspagFees')
-            ->willReturn(20.0);
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('getItems')
-            ->willReturn([$this->orderItemMock]);
-        $this->orderItemMock
-            ->expects($this->exactly(1))
-            ->method('getBaseRowTotal')
-            ->willReturn(66.6);
-        $this->orderItemMock
-            ->expects($this->exactly(2))
-            ->method('getRowTotal')
-            ->willReturn(66.6);
-        $this->orderItemMock
-            ->expects($this->exactly(4))
-            ->method('setData')
+            ->method('setBraspagFeesAmount')
             ->willReturnSelf();
-
         $this->assertNull($this->instance->execute($this->observerEventMock));
     }
 
@@ -178,11 +164,10 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             )
             ->addMethods(
                 [
-                    'getBraspagFees',
                     'getBaseGrandTotal',
                     'getGrandTotal',
-                    'getBaseSubtotal',
-                    'getSubtotal'
+                    'getBraspagFees',
+                    'getBraspagFeesAmount'
                 ]
             )
             ->getMock();
@@ -192,36 +177,17 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->onlyMethods(
                 [
                     'setBaseGrandTotal',
-                    'setGrandTotal',
-                    'setBaseSubtotal',
-                    'setSubtotal',
-                    'getItems'
+                    'setGrandTotal'
                 ]
             )
             ->addMethods(
                 [
                     'setBraspagFees',
-                    'getBraspagFees'
+                    'setBraspagFeesAmount'
                 ]
             )
             ->getMock();
         $this->paymentMock = $this->createMock(Payment::class);
-        $this->orderItemMock = $this
-            ->getMockBuilder(Item::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(
-                [
-                    'getBaseRowTotal',
-                    'getRowTotal',
-                    'setData'
-                ]
-            )
-            // ->addMethods(
-            //     [
-            //         'setBraspagFees'
-            //     ]
-            // )
-            ->getMock();
     }
 
     /**
