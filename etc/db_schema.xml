@@ -14,8 +14,4 @@
         <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
         <column xsi:type="decimal" name="braspag_fees_amount" precision="20" scale="4" comment="Braspag Fees Amount"/>
     </table>
-    <table name="sales_order_item" resource="default" engine="innodb">
-        <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
-        <column xsi:type="decimal" name="braspag_fees_amount" precision="20" scale="4" comment="Braspag Fees Amount"/>
-    </table>
 </schema>

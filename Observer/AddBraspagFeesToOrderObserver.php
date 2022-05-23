@@ -57,16 +57,11 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
             && (bool) $this->installmentsConfig->getInterestRate()
         ) {
             $braspagFees = $quote->getBraspagFees();
-            $newShippingAmount = $this->getNewShippingAmount($order, $braspagFees);
-
+    
             $order->setBaseGrandTotal($quote->getBaseGrandTotal())
                 ->setGrandTotal($quote->getGrandTotal())
                 ->setBraspagFees($braspagFees)
-                ->setBraspagFeesAmount($quote->getBraspagFeesAmount())
-                ->setBaseShippingAmount($newShippingAmount)
-                ->setShippingAmount($newShippingAmount);
-
-            $this->setOrderItemsWithInterestRate($order);
+                ->setBraspagFeesAmount($quote->getBraspagFeesAmount());
         }
     }
 
@@ -80,76 +75,5 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
     {
         return $payment
             ->getData('additional_information')['cc_installments'] ?? 1;
-    }
-
-    /**
-     * Get new Shipping amount according with braspag_fees
-     *
-     * @param mixed $order
-     * @param mixed $braspagFees
-     * @return void
-     */
-    private function getNewShippingAmount($order, $braspagFees)
-    {
-        return $order->getShippingAmount() * (1 + ($braspagFees/100));
-    }
-
-    /**
-     * Get all the new prices according with braspag fees
-     *
-     * @param mixed $orderItem
-     * @param mixed $interestRate
-     * @return void
-     */
-    private function getNewPricesWithBraspagFees($orderItem, $interestRate)
-    {
-        $baseRowTotal = $this
-            ->calcTotalPriceWithInterest($orderItem->getBaseRowTotal(), $interestRate);
-        $rowTotal = $this
-            ->calcTotalPriceWithInterest($orderItem->getRowTotal(), $interestRate);
-        return [
-            $baseRowTotal,
-            $rowTotal
-        ];
-    }
-
-    /**
-     * Calculate total price according with the interest rate
-     *
-     * @param mixed $total
-     * @param mixed $interestRate
-     * @return void
-     */
-    private function calcTotalPriceWithInterest($total, $interestRate)
-    {
-        return $total * (1 + ($interestRate/100));
-    }
-
-    /**
-     * Total Interest Rate
-     *
-     * @param mixed $total
-     * @param mixed $totalWithInterestRate
-     * @return void
-     */
-    private function totalInterestRateAmount($total, $totalWithInterestRate)
-    {
-        return ($totalWithInterestRate -  $total);
-    }
-
-    private function setOrderItemsWithInterestRate($order)
-    {
-        $braspagFees = $order->getBraspagFees();
-        $orderItems = $order->getItems();
-        foreach ($orderItems as $item) {
-            list($baseRowTotal, $rowTotal) = $this
-                ->getNewPricesWithBraspagFees($item, $braspagFees);
-            $braspagFeesAmount = $this
-                ->totalInterestRateAmount($item->getRowTotal(), $rowTotal);
-            $item->setData('base_row_total', $baseRowTotal);
-            $item->setData('row_total', $rowTotal);
-            $item->setData('braspag_fees', $braspagFees);
-            $item->setData('braspag_fees_amount', $braspagFeesAmount);
-        }
     }
 }
