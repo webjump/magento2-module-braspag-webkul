@@ -21,5 +21,15 @@
             "braspag_fees": true,
             "braspag_fees_amount": true
         }
+    },
+    "sales_order_item": {
+        "column": {
+            "braspag_fees": true
+        }
+    },
+    "marketplace_orders": {
+        "column": {
+            "shipping_charges_incl_tax": true
+        }
     }
 }
