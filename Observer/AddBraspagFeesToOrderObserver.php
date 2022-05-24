@@ -57,11 +57,13 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
             && (bool) $this->installmentsConfig->getInterestRate()
         ) {
             $braspagFees = $quote->getBraspagFees();
-    
+
             $order->setBaseGrandTotal($quote->getBaseGrandTotal())
                 ->setGrandTotal($quote->getGrandTotal())
                 ->setBraspagFees($braspagFees)
                 ->setBraspagFeesAmount($quote->getBraspagFeesAmount());
+
+            $this->setOrderItemsWithBraspagFees($order);
         }
     }
 
@@ -75,5 +77,61 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
     {
         return $payment
             ->getData('additional_information')['cc_installments'] ?? 1;
+    }
+
+    private function setOrderItemsWithBraspagFees($order)
+    {
+        $braspagFees = $order->getBraspagFees();
+        $orderItems = $order->getItems();
+        foreach ($orderItems as $item) {
+            list(
+                $basePriceInclTax,
+                $priceIncTax,
+                $baseRowTotalInclTax,
+                $rowTotalInclTax
+            ) = $this->getPricesInclBraspagFees($item, $braspagFees);
+            $item->setData('braspag_fees', $braspagFees)
+                ->setData('base_price_incl_tax', $basePriceInclTax)
+                ->setData('price_incl_tax', $priceIncTax)
+                ->setData('base_row_total_incl_tax', $baseRowTotalInclTax)
+                ->setData('row_total_incl_tax', $rowTotalInclTax);
+        }
+    }
+
+    /**
+    * Get all the new prices according with braspag fees
+    *
+    * @param mixed $orderItem
+    * @param mixed $interestRate
+    * @return void
+    */
+    private function getPricesInclBraspagFees($orderItem, $interestRate)
+    {
+        $basePriceInclTax = $this
+            ->calcTotalPriceWithInterestRate($orderItem->getBasePriceInclTax(), $interestRate);
+        $priceIncTax = $this
+            ->calcTotalPriceWithInterestRate($orderItem->getPriceInclTax(), $interestRate);
+        $baseRowTotalInclTax = $this
+            ->calcTotalPriceWithInterestRate($orderItem->getBaseRowTotalInclTax(), $interestRate);
+        $rowTotalInclTax = $this
+            ->calcTotalPriceWithInterestRate($orderItem->getRowTotalInclTax(), $interestRate);
+        return [
+            $basePriceInclTax,
+            $priceIncTax,
+            $baseRowTotalInclTax,
+            $rowTotalInclTax
+        ];
+    }
+
+    /**
+     * Calculate total price according with the interest rate
+     *
+     * @param mixed $total
+     * @param mixed $interestRate
+     * @return void
+     */
+    private function calcTotalPriceWithInterestRate($total, $interestRate)
+    {
+        return $total * (1 + ($interestRate/100));
     }
 }
