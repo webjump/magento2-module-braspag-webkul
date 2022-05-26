@@ -20,14 +20,15 @@ class Totals extends \Magento\Sales\Block\Order\Invoice\Totals
     {
         parent::_initTotals();
         $this->removeTotal('base_grandtotal');
+        
         /**
         * Add Braspag Fees
         */
-        if ((double)$this->getOrder()->getBraspagFeesAmount() != 0) {
+        if ((double)$this->getSource()->getBraspagFeesAmount() != 0) {
             $total = new \Magento\Framework\DataObject(
                 [
                    'code' => 'braspag_fees_amount',
-                   'value' => $this->getOrder()->getBraspagFeesAmount(),
+                   'value' => $this->getSource()->getBraspagFeesAmount(),
                    'label' => __('Fees of the Card'),
                ]
             );

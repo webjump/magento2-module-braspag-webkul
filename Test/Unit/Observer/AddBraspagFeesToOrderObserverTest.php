@@ -141,7 +141,44 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->expects($this->exactly(1))
             ->method('setBraspagFeesAmount')
             ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('getBraspagFees')
+            ->willReturn(20);
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('getItems')
+            ->willReturn([$this->orderItemMock]);
+        $this->applyOrderItemsMocks();
+
         $this->assertNull($this->instance->execute($this->observerEventMock));
+    }
+
+    /**
+     * @return void
+     */
+    private function applyOrderItemsMocks(): void
+    {
+        $this->orderItemMock
+            ->expects($this->exactly(1))
+            ->method('getBasePriceInclTax')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(1))
+            ->method('getBasePriceInclTax')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(1))
+            ->method('getBaseRowTotalInclTax')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(1))
+            ->method('getRowTotalInclTax')
+            ->willReturn(66.6);
+        $this->orderItemMock
+            ->expects($this->exactly(5))
+            ->method('setData')
+            ->willReturnSelf();
     }
 
     /**
@@ -177,16 +214,31 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->onlyMethods(
                 [
                     'setBaseGrandTotal',
-                    'setGrandTotal'
+                    'setGrandTotal',
+                    'getItems'
                 ]
             )
             ->addMethods(
                 [
                     'setBraspagFees',
-                    'setBraspagFeesAmount'
+                    'setBraspagFeesAmount',
+                    'getBraspagFees'
                 ]
             )
             ->getMock();
+        $this->orderItemMock = $this
+                ->getMockBuilder(Item::class)
+                ->disableOriginalConstructor()
+                ->onlyMethods(
+                    [
+                        'getBasePriceInclTax',
+                        'getPriceInclTax',
+                        'getBaseRowTotalInclTax',
+                        'getRowTotalInclTax',
+                        'setData'
+                    ]
+                )
+                ->getMock();
         $this->paymentMock = $this->createMock(Payment::class);
     }
 

@@ -31,5 +31,11 @@
         "column": {
             "shipping_charges_incl_tax": true
         }
+    },
+    "sales_invoice": {
+        "column": {
+            "braspag_fees": true,
+            "braspag_fees_amount": true
+        }
     }
 }
