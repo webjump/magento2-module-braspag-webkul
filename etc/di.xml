@@ -16,8 +16,10 @@
         type="Braspag\Webkul\Block\Adminhtml\Order\Invoice\Totals"/>
     <preference for="Magento\Sales\Block\Order\Invoice\Totals"
         type="Braspag\Webkul\Block\Order\Invoice\Totals"/>
-    <!-- <preference for="Webkul\Marketplace\Block\Order\Totals"
-        type="Braspag\Webkul\Block\Marketplace\Order\Totals"/> -->
+    <preference for="Webkul\Marketplace\Block\Order\Totals"
+        type="Braspag\Webkul\Block\Marketplace\Order\Totals"/>
+    <preference for="Webkul\Marketplace\Block\Order\Invoice\Totals"
+        type="Braspag\Webkul\Block\Marketplace\Order\Invoice\Totals"/>
 
     <type name="Webjump\BraspagPagador\Model\Source\PaymentSplitMarketplaceVendor">
         <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceListPlugin"/>
