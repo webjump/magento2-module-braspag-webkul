@@ -1,8 +1,16 @@
-<?php 
+<?php
+/**
+ * Webkul Software.
+ *
+ * @category  Webkul
+ * @package   Webkul_Marketplace
+ * @author    Webkul
+ * @copyright Copyright (c) Webkul Software Private Limited (https://webkul.com)
+ * @license   https://store.webkul.com/license.html
+ */
+namespace Braspag\Webkul\Block\Marketplace\Order\Invoice;
 
-namespace Braspag\Webkul\Block\Marketplace\Order;
-
-class Totals extends \Webkul\Marketplace\Block\Order\Totals
+class Totals extends \Webkul\Marketplace\Block\Order\Invoice\Totals
 {
     protected function _initTotals()
     {
@@ -144,7 +152,6 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
             }
         }
     }
-
     public function getOrderedAmount($source)
     {
       return $source['total_amount'];

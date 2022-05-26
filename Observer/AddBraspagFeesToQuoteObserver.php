@@ -15,30 +15,35 @@ namespace Braspag\Webkul\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
-use Webjump\BraspagPagador\Gateway\Transaction\Base\Config\InstallmentsConfigInterface;
+use Braspag\Webkul\Model\Observer\BraspagFeesToQuote as BraspagFeesHelper;
+use Braspag\Webkul\Model\BraspagFees\PaymentValidator;
 
 class AddBraspagFeesToQuoteObserver implements ObserverInterface
 {
-    /** @var string */
-    const CC_PAYMENT_METHOD = 'braspag_pagador_creditcard';
 
-    /** @var InstallmentsConfigInterface */
-    private $installmentsConfig;
+    /** @var BraspagFeesHelper */
+    private $helper;
 
     /** @var CartRepositoryInterface */
     private $quoteRepository;
 
+    /** @var PaymentValidator */
+    private $paymentValidator;
+
     /**
      * Construct method
      *
-     * @param InstallmentsConfigInterface $installmentsConfig
+     * @param BraspagFeesHelper $helper
+     * @param PaymentValidator $paymentValidator
      * @param CartRepositoryInterface $quoteRepository
      */
     public function __construct(
-        InstallmentsConfigInterface $installmentsConfig,
+        BraspagFeesHelper $helper,
+        PaymentValidator $paymentValidator,
         CartRepositoryInterface $quoteRepository
     ) {
-        $this->installmentsConfig = $installmentsConfig;
+        $this->helper = $helper;
+        $this->paymentValidator = $paymentValidator;
         $this->quoteRepository = $quoteRepository;
     }
 
@@ -48,25 +53,28 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
      * @param Observer $observer
      * @return void
      */
-    public function execute(Observer $observer)
-    {
-        $quote = $observer->getData('quote');
-        $payment = $quote
-            ->getPayment();
-        $method = $payment
-            ->getData('method');
+    public function execute(
+        Observer $observer
+    ) {
+        list(
+            $quote,
+            $method,
+            $ccInstallments
+        ) = $this->helper->getPaymentInformation($observer);
 
-        if ($this->installmentsConfig->isActive()
-            && $method == self::CC_PAYMENT_METHOD
-            && ($ccInstallments = $this->getCCInstallments($payment)) > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
-            && (bool) $interestRate = $this->installmentsConfig->getInterestRate()
+        if ($this->paymentValidator
+            ->isValid($method, $ccInstallments)
         ) {
-            list($newBaseGrandTotal, $newGrandTotal) = $this
-                ->getNewPricesWithBraspagFees($ccInstallments, $quote, $interestRate);
-            list($braspagFees, $braspagFeesAmount) = $this
-                ->getTotalsInterestRate($quote->getBaseGrandTotal(), $newBaseGrandTotal);
+            list(
+                $newBaseGrandTotal,
+                $newGrandTotal,
+                $braspagFees,
+                $braspagFeesAmount
+            ) = $this->helper
+                ->getNewQuoteInformation($quote, $ccInstallments);
 
-            $quote->setBaseGrandTotal($newBaseGrandTotal)
+            $quote
+                ->setBaseGrandTotal($newBaseGrandTotal)
                 ->setGrandTotal($newGrandTotal)
                 ->setBraspagFees($braspagFees)
                 ->setBraspagFeesAmount($braspagFeesAmount);
@@ -75,68 +83,5 @@ class AddBraspagFeesToQuoteObserver implements ObserverInterface
             $this->quoteRepository
                 ->save($quote);
         }
-    }
-
-    /**
-     * Get credit card instalments
-     *
-     * @param mixed $payment
-     * @return void
-     */
-    private function getCCInstallments($payment)
-    {
-        return $payment
-            ->getData('additional_information')['cc_installments'] ?? 1;
-    }
-
-    /**
-     * Get all the new prices according with braspag fees
-     *
-     * @param mixed $ccInstallments
-     * @param mixed $quote
-     * @param mixed $interestRate
-     * @return void
-     */
-    private function getNewPricesWithBraspagFees($ccInstallments, $quote, $interestRate)
-    {
-        $newBaseGrandTotal = $this
-            ->calcTotalPriceWithInterest($ccInstallments, $quote->getBaseGrandTotal(), $interestRate);
-        $newGrandTotal = $this
-            ->calcTotalPriceWithInterest($ccInstallments, $quote->getGrandTotal(), $interestRate);
-        return [
-            $newBaseGrandTotal,
-            $newGrandTotal
-        ];
-    }
-
-    /**
-     * Calc total price according with interest rate
-     *
-     * @param mixed $ccInstallments
-     * @param mixed $total
-     * @param mixed $interestRate
-     * @return void
-     */
-    private function calcTotalPriceWithInterest($ccInstallments, $total, $interestRate)
-    {
-        $price = $total * $interestRate / (1 - (1 / pow((1 + $interestRate), $ccInstallments)));
-        return  $ccInstallments * (float) sprintf("%01.2f", $price);
-    }
-
-    /**
-     * Get interest rate and interest rate amount
-     *
-     * @param mixed $total
-     * @param mixed $totalWithInterestRate
-     * @return void
-     */
-    private function getTotalsInterestRate($total, $totalWithInterestRate)
-    {
-        $totalInterestRate = (($totalWithInterestRate/ $total) - 1) * 100;
-        $totalInterestRateAmount = ($totalWithInterestRate -  $total);
-        return [
-            $totalInterestRate,
-            $totalInterestRateAmount
-        ];
     }
 }
