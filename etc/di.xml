@@ -23,7 +23,11 @@
         <plugin name="braspagPaymentSplitMarketplaceVendorsListSource" type="Braspag\Webkul\Plugin\PaymentSplitVendorSourceListPlugin"/>
     </type>
 
-    <type name="Webjump\BraspagPagador\Model\SplitDataProvider">
+    <type name="Webkul\Marketplace\Model\ResourceModel\Saleslist\Collection">
+        <plugin name="braspagFeesToSalesListCollection" type="Braspag\Webkul\Plugin\Marketplace\Model\BraspagFeesToSalesListCollection"/>
+    </type>
+
+     <type name="Webjump\BraspagPagador\Model\SplitDataProvider">
         <plugin name="braspagSplitDataProvider" type="Braspag\Webkul\Plugin\SplitDataProviderPlugin"/>
     </type>
 
