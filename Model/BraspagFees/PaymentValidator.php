@@ -44,6 +44,7 @@ class PaymentValidator
     public function isValid($method, $ccInstallments)
     {
         if ($this->installmentsConfig->isActive()
+            && $this->installmentsConfig->isInterestByIssuer()
             && $method == self::CC_PAYMENT_METHOD
             && $ccInstallments > (int) $this->installmentsConfig->getInstallmentsMaxWithoutInterest()
             && (bool) $this->installmentsConfig->getInterestRate()
