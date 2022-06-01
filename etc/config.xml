@@ -1,4 +1,21 @@
 <?xml version="1.0"?>
+<!--
+/**
+ *
+ * @author      Webjump Core Team <dev@webjump.com.br>
+ * @copyright   2022 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
+ * @link        http://www.webjump.com.br
+ *
+ */
+ -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+        <default>
+                <payment>
+                        <braspag_pagador_creditcard>
+                                <installments_force_interest_by_merchant>1</installments_force_interest_by_merchant>
+                        </braspag_pagador_creditcard>
+                </payment>
+        </default>
 </config>

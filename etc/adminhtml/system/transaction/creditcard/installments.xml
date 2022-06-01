@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+/**
+ *
+ * @author      Webjump Core Team <dev@webjump.com.br>
+ * @copyright   2022 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
+ * @link        http://www.webjump.com.br
+ *
+ */
+ -->
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="webjump_braspag_pagador_transaction_creditcard_installments" translate="label comment" showInDefault="1" showInWebsite="1" showInStore="1" sortOrder="74">
+    	<label>Installments</label>
+	    <field id="installments_force_interest_by_merchant" showInDefault="1" showInStore="1" showInWebsite="1" sortOrder="70" translate="label" type="select">
+	        <label>Force Interest by Merchant</label>
+	        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+	        <comment>
+				With this enable, even if interest has been set by the issuer, interest will be sent to braspag as interest by merchant.
+			</comment>
+			<config_path>payment/braspag_pagador_creditcard/installments_force_interest_by_merchant</config_path>
+            <depends>
+                <field id="installments_active">1</field>
+            </depends>
+	    </field>
+	</group>
+</include>

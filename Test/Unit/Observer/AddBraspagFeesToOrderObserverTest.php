@@ -21,7 +21,8 @@ use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Item;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Webjump\BraspagPagador\Gateway\Transaction\Base\Config\InstallmentsConfigInterface;
+use Braspag\Webkul\Model\BraspagFees\PaymentValidator;
+use Braspag\Webkul\Model\BraspagFees\TaxCalculator;
 
 class AddBraspagFeesToOrderObserverTest extends TestCase
 {
@@ -29,8 +30,11 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
     /** @var MockObject | ObserverEvent */
     private $observerEventMock;
 
-    /** @var MockObject | InstallmentsConfigInterface */
-    private $installmentsConfigMock;
+    /** @var MockObject | PaymentValidator */
+    private $paymentValidatorMock;
+
+    /** @var MockObject | TaxCalculator */
+    private $taxCalculatorMock;
 
     /** @var MockObject | Order */
     private $orderMock;
@@ -93,54 +97,16 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->expects($this->exactly(1))
             ->method('getId')
             ->willReturn(1011);
-
-        $this->installmentsConfigMock
+        
+        $this->paymentValidatorMock
             ->expects($this->exactly(1))
-            ->method('isActive')
+            ->method('isValid')
             ->willReturn(true);
 
-        $this->installmentsConfigMock
-            ->expects($this->any())
-            ->method('getInstallmentsMaxWithoutInterest')
-            ->willReturn(1);
+        $this->applyGetQuoteValues();
 
-        $this->installmentsConfigMock
-            ->expects($this->exactly(1))
-            ->method('getInterestRate')
-            ->willReturn(2.25);
-
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getBaseGrandTotal')
-            ->willReturn(3015);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getGrandTotal')
-            ->willReturn(3015);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getBraspagFees')
-            ->willReturn(26.2232);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getBraspagFeesAmount')
-            ->willReturn(26.2232);
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('setBaseGrandTotal')
-            ->willReturnSelf();
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('setGrandTotal')
-            ->willReturnSelf();
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('setBraspagFees')
-            ->willReturnSelf();
-        $this->orderMock
-            ->expects($this->exactly(1))
-            ->method('setBraspagFeesAmount')
-            ->willReturnSelf();
+        $this->applySetOrderValues();
+        
         $this->orderMock
             ->expects($this->exactly(1))
             ->method('getBraspagFees')
@@ -157,24 +123,63 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
     /**
      * @return void
      */
+    private function applyGetQuoteValues()
+    {
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('getBaseGrandTotal')
+            ->willReturn(3015);
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('getGrandTotal')
+            ->willReturn(3015);
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('getBraspagFees')
+            ->willReturn(26.2232);
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('getBraspagFeesAmount')
+            ->willReturn(26.2232);
+    }
+
+    /**
+     * @return void
+     */
+    private function applySetOrderValues()
+    {
+        $this->orderMock
+        ->expects($this->exactly(1))
+        ->method('setBaseGrandTotal')
+        ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('setGrandTotal')
+            ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('setBraspagFees')
+            ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->exactly(1))
+            ->method('setBraspagFeesAmount')
+            ->willReturnSelf();
+    }
+
+    /**
+     * @return void
+     */
     private function applyOrderItemsMocks(): void
     {
-        $this->orderItemMock
+        $this->taxCalculatorMock
             ->expects($this->exactly(1))
-            ->method('getBasePriceInclTax')
-            ->willReturn(66.6);
-        $this->orderItemMock
-            ->expects($this->exactly(1))
-            ->method('getBasePriceInclTax')
-            ->willReturn(66.6);
-        $this->orderItemMock
-            ->expects($this->exactly(1))
-            ->method('getBaseRowTotalInclTax')
-            ->willReturn(66.6);
-        $this->orderItemMock
-            ->expects($this->exactly(1))
-            ->method('getRowTotalInclTax')
-            ->willReturn(66.6);
+            ->method('getItemPricesInclBraspagFees')
+            ->willReturn([
+                66.6,
+                66.6,
+                66.6,
+                66.6
+            ]);
         $this->orderItemMock
             ->expects($this->exactly(5))
             ->method('setData')
@@ -188,8 +193,10 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
     {
         $this->observerEventMock = $this
             ->createMock(ObserverEvent::class);
-        $this->installmentsConfigMock = $this
-            ->createMock(InstallmentsConfigInterface::class);
+        $this->paymentValidatorMock = $this
+            ->createMock(PaymentValidator::class);
+        $this->taxCalculatorMock = $this
+            ->createMock(TaxCalculator::class);
         $this->quoteMock = $this
             ->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
@@ -231,10 +238,6 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
                 ->disableOriginalConstructor()
                 ->onlyMethods(
                     [
-                        'getBasePriceInclTax',
-                        'getPriceInclTax',
-                        'getBaseRowTotalInclTax',
-                        'getRowTotalInclTax',
                         'setData'
                     ]
                 )
@@ -252,7 +255,8 @@ class AddBraspagFeesToOrderObserverTest extends TestCase
             ->getObject(
                 Observer::class,
                 [
-                    'installmentsConfig' => $this->installmentsConfigMock
+                    'paymentValidator' => $this->paymentValidatorMock,
+                    'taxCalculator' => $this->taxCalculatorMock
                 ]
             );
     }
