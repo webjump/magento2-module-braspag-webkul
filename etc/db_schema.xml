@@ -18,6 +18,14 @@
         <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
     </table>
     <table name="marketplace_orders" resource="default" engine="innodb">
-        <column xsi:type="decimal" name="shipping_charges_incl_tax" precision="20" scale="4" comment="Shipping Charges including Braspag fees"/>
+        <column xsi:type="decimal" name="shipping_charges_incl_tax" precision="20" scale="4" comment="Shipping Charges incl Braspag fees"/>
+    </table>
+    <table name="sales_invoice" resource="default" engine="innodb">
+        <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
+        <column xsi:type="decimal" name="braspag_fees_amount" precision="20" scale="4" comment="Braspag Fees Amount"/>
+    </table>
+    <table name="marketplace_saleslist" resource="default" engine="innodb">
+        <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
+        <column xsi:type="decimal" name="braspag_fees_amount" precision="20" scale="4" comment="Braspag Fees Amount"/>
     </table>
 </schema>
