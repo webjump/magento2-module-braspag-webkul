@@ -66,7 +66,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
             ->isValid($method, $ccInstallments)
         ) {
             $braspagFees = $quote->getBraspagFees();
-    
+
             $order->setBaseGrandTotal($quote->getBaseGrandTotal())
                 ->setGrandTotal($quote->getGrandTotal())
                 ->setBraspagFees($braspagFees)

@@ -1,9 +1,20 @@
 <?xml version="1.0"?>
+<!--
+/**
+ *
+ * @author      Webjump Core Team <dev@webjump.com.br>
+ * @copyright   2022 Webjump (http://www.webjump.com.br)
+ * @license     http://www.webjump.com.br  Copyright
+ * @link        http://www.webjump.com.br
+ *
+ */
+ -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
     <preference for="Webkul\Marketplace\Block\Adminhtml\Customer\Edit\Tabs" type="Braspag\Webkul\Block\Adminhtml\Customer\Edit\Tabs"/>
     <preference for="Webkul\Marketplace\Controller\Account\EditprofilePost" type="Braspag\Webkul\Controller\Account\EditprofilePost"/>
     <preference for="Webkul\Marketplace\Helper\Data" type="Braspag\Webkul\Helper\Data"/>
     <preference for="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\ConfigInterface" type="Braspag\Webkul\Gateway\Transaction\PaymentSplit\Config\Config"/>
+    <preference for="Braspag\Webkul\Gateway\Transaction\Base\Config\ConfigInterface" type="Braspag\Webkul\Gateway\Transaction\Base\Config\Config"/>
     
     <preference for="Webjump\BraspagPagador\Gateway\Transaction\Base\Resource\Installments\Installment" type="Braspag\Webkul\Gateway\Transaction\Base\Resource\Installments\Installment"/>
     <preference for="Webjump\BraspagPagador\Model\Installments" type="Braspag\Webkul\Model\Installments"/>
@@ -33,9 +44,9 @@
         <plugin name="braspagSplitDataProvider" type="Braspag\Webkul\Plugin\SplitDataProviderPlugin"/>
     </type>
 
-    <!--<type name="Webkul\Marketplace\Observer\SalesOrderPlaceAfterObserver">-->
-        <!--<plugin name="getCommission" type="Braspag\Webkul\Plugin\Observer\SalesOrderPlaceAfterObserverPlugin"/>-->
-    <!--</type>-->
+    <type name="Webjump\BraspagPagador\Gateway\Transaction\CreditCard\Resource\Authorize\Request">
+        <plugin name="forceInterestByMerchant" type="Braspag\Webkul\Plugin\Gateway\Transaction\CreditCard\ForceInterestByMerchantPlugin"/>
+    </type>
 
     <virtualType name="BraspagTransactionSplitPaymentCreateSubordinateCommandResponseHandlerPool" type="Magento\Payment\Gateway\Response\HandlerChain">
         <arguments>

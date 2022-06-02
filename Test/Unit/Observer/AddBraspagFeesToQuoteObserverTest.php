@@ -17,10 +17,10 @@ use Magento\Framework\Event\Observer as ObserverEvent;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Model\Quote;
-use Magento\Quote\Model\Quote\Payment;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Webjump\BraspagPagador\Gateway\Transaction\Base\Config\InstallmentsConfigInterface;
+use Braspag\Webkul\Model\Observer\BraspagFeesToQuote as BraspagFeesHelper;
+use Braspag\Webkul\Model\BraspagFees\PaymentValidator;
 
 class AddBraspagFeesToQuoteObserverTest extends TestCase
 {
@@ -28,17 +28,17 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
     /** @var MockObject | ObserverEvent */
     private $observerEventMock;
 
-    /** @var MockObject | InstallmentsConfigInterface */
-    private $installmentsConfigMock;
+    /** @var MockObject | BraspagFeesHelper */
+    private $braspagFeesHelperMock;
+    
+    /** @var MockObject | PaymentValidator */
+    private $paymentValidatorMock;
 
     /** @var MockObject | CartRepositoryInterface */
     private $quoteRepositoryMock;
 
     /** @var MockObject | Quote */
     private $quoteMock;
-
-    /** @var MockObject | Payment */
-    private $paymentMock;
 
     /** @var Observer */
     private $instance;
@@ -57,52 +57,32 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
      */
     public function testObserverShouldPerformWithoutError(): void
     {
-        $this->observerEventMock
+        $this->braspagFeesHelperMock
             ->expects($this->exactly(1))
-            ->method('getData')
+            ->method('getPaymentInformation')
             ->willReturn(
-                $this->quoteMock
+                [
+                    $this->quoteMock,
+                    'braspag_pagador_creditcard',
+                    3
+                ]
             );
-        $this->quoteMock
+        $this->paymentValidatorMock
             ->expects($this->exactly(1))
-            ->method('getPayment')
-            ->willReturn($this->paymentMock);
-
-        $this->paymentMock
-            ->expects($this->exactly(2))
-            ->method('getData')
-            ->withConsecutive(
-                ['method'],
-                ['additional_information']
-            )
-            ->willReturnOnConsecutiveCalls(
-                'braspag_pagador_creditcard',
-                ['cc_installments' => 4]
-            );
-
-        $this->installmentsConfigMock
-            ->expects($this->exactly(1))
-            ->method('isActive')
+            ->method('isValid')
             ->willReturn(true);
-
-        $this->installmentsConfigMock
-            ->expects($this->any())
-            ->method('getInstallmentsMaxWithoutInterest')
-            ->willReturn(1);
-
-        $this->installmentsConfigMock
+        
+        $this->braspagFeesHelperMock
             ->expects($this->exactly(1))
-            ->method('getInterestRate')
-            ->willReturn(2.25);
-
-        $this->quoteMock
-            ->expects($this->exactly(2))
-            ->method('getBaseGrandTotal')
-            ->willReturn(3015);
-        $this->quoteMock
-            ->expects($this->exactly(1))
-            ->method('getGrandTotal')
-            ->willReturn(3015);
+            ->method('getNewQuoteInformation')
+            ->willReturn(
+                [
+                    '120',
+                    '120',
+                    '20',
+                    '20'
+                ]
+            );
         $this->quoteMock
             ->expects($this->exactly(1))
             ->method('setBaseGrandTotal')
@@ -114,6 +94,10 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
         $this->quoteMock
             ->expects($this->exactly(1))
             ->method('setBraspagFees')
+            ->willReturnSelf();
+        $this->quoteMock
+            ->expects($this->exactly(1))
+            ->method('setBraspagFeesAmount')
             ->willReturnSelf();
         $this->quoteMock
             ->expects($this->exactly(1))
@@ -134,29 +118,26 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
     {
         $this->observerEventMock = $this
             ->createMock(ObserverEvent::class);
-        $this->installmentsConfigMock = $this
-            ->createMock(InstallmentsConfigInterface::class);
+        $this->paymentValidatorMock = $this->createMock(PaymentValidator::class);
+        $this->braspagFeesHelperMock = $this->createMock(BraspagFeesHelper::class);
         $this->quoteRepositoryMock = $this->createMock(CartRepositoryInterface::class);
         $this->quoteMock = $this
             ->getMockBuilder(Quote::class)
             ->disableOriginalConstructor()
             ->onlyMethods(
                 [
-                    'getPayment',
                     'collectTotals'
                 ]
             )
             ->addMethods(
                 [
-                    'getBaseGrandTotal',
-                    'getGrandTotal',
                     'setBaseGrandTotal',
                     'setGrandTotal',
                     'setBraspagFees',
+                    'setBraspagFeesAmount'
                 ]
             )
             ->getMock();
-        $this->paymentMock = $this->createMock(Payment::class);
     }
 
     /**
@@ -169,7 +150,8 @@ class AddBraspagFeesToQuoteObserverTest extends TestCase
             ->getObject(
                 Observer::class,
                 [
-                    'installmentsConfig' => $this->installmentsConfigMock,
+                    'helper' => $this->braspagFeesHelperMock,
+                    'paymentValidator' => $this->paymentValidatorMock,
                     'quoteRepository' => $this->quoteRepositoryMock
                 ]
             );

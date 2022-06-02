@@ -35,3 +35,4 @@
 "without additional", "sem acréscimo"
 "with additional of", "acréscimo de"
 "Fees of the Card","Juros no Cartão"
+"With this enable, even if interest has been set by issuer, interest will be sent to braspag as interest by merchant.", "Com esta opção habilitada, mesmo se juros pelo emissor estiver configurado para a braspag, juros pelo estabelecimento será enviado."
