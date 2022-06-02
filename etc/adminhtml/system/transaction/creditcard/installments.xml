@@ -16,7 +16,7 @@
 	        <label>Force Interest by Merchant</label>
 	        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
 	        <comment>
-				With this enable, even if interest has been set by the issuer, interest will be sent to braspag as interest by merchant.
+				With this enable, even if interest has been set by issuer, interest will be sent to braspag as interest by merchant.
 			</comment>
 			<config_path>payment/braspag_pagador_creditcard/installments_force_interest_by_merchant</config_path>
             <depends>
