@@ -152,8 +152,15 @@ class Totals extends \Webkul\Marketplace\Block\Order\Invoice\Totals
             }
         }
     }
+
     public function getOrderedAmount($source)
     {
+        $totalAmountEqualsZero = ceil($source["total_amount"]) < 1;
+        
+        if ($totalAmountEqualsZero) {
+            return $source['total_amount'];
+        }
+
         $totalCouponAmount = $source['coupon_amount'];
         return $source['total_amount'] - $totalCouponAmount;
     }
