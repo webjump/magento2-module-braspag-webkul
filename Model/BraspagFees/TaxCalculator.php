@@ -28,7 +28,7 @@ class TaxCalculator
         $price = $total * $interestRate / (1 - (1 / pow((1 + $interestRate), $ccInstallments)));
         return  $ccInstallments * (float) sprintf("%01.2f", $price);
     }
-    
+
     /**
      * Get braspag fees and it real amount
      *
@@ -76,13 +76,24 @@ class TaxCalculator
     public function getItemPricesInclBraspagFees($orderItem, $interestRate)
     {
         $basePriceInclTax = $this
-            ->getTotalInclBraspagFees($orderItem->getBasePriceInclTax(), $interestRate);
+            ->getTotalInclBraspagFees(
+                $orderItem->getBasePriceInclTax(),
+                $interestRate
+            );
         $priceIncTax = $this
-            ->getTotalInclBraspagFees($orderItem->getPriceInclTax(), $interestRate);
+            ->getTotalInclBraspagFees(
+                $orderItem->getPriceInclTax(), $interestRate
+            );
         $baseRowTotalInclTax = $this
-            ->getTotalInclBraspagFees($orderItem->getBaseRowTotalInclTax(), $interestRate);
+            ->getTotalInclBraspagFees(
+                ($orderItem->getBaseRowTotalInclTax() - $orderItem->getDiscountAmount()),
+                $interestRate
+            );
         $rowTotalInclTax = $this
-            ->getTotalInclBraspagFees($orderItem->getRowTotalInclTax(), $interestRate);
+            ->getTotalInclBraspagFees(
+                ($orderItem->getRowTotalInclTax() - $orderItem->getDiscountAmount()),
+                $interestRate
+            );
         return [
             $basePriceInclTax,
             $priceIncTax,
@@ -90,7 +101,7 @@ class TaxCalculator
             $rowTotalInclTax
         ];
     }
-    
+
     /**
      * Get some total including braspagfees
      *
