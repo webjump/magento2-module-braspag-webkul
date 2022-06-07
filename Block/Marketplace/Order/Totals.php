@@ -163,29 +163,17 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
         $refundedShippingAmount = $source['refunded_shipping_charges'];
         $couponamount = $source['applied_coupon_amount'];
         $totaltax = $source['total_tax'];
-        $vendorSubtotalEqualsZero = ceil($source["actual_seller_amount"]) < 1;
 
         $vendortotaltax = 0;
         if ($taxToSeller) {
             $vendortotaltax = $totaltax;
         }
 
-        if ($vendorSubtotalEqualsZero) {
-            return $vendorSubtotal + $vendortotaltax;
-        }
-
-        return $vendorSubtotal + $vendortotaltax -$couponamount;
+        return $vendorSubtotal + $vendortotaltax;
     }
     
     public function getOrderedAmount($source)
     {
-        $totalAmountEqualsZero = ceil($source["total_amount"]) < 1;
-        
-        if ($totalAmountEqualsZero) {
-            return $source['total_amount'];
-        }
-
-        $totalCouponAmount = $source['coupon_amount'];
-        return $source['total_amount'] - $totalCouponAmount;
+        return $source['total_amount'];
     }
 }
