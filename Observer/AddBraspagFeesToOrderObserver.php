@@ -22,7 +22,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
 
     /** @var PaymentValidator */
     private $paymentValidator;
-    
+
     /** @var TaxCalculator */
     private $taxCalculator;
 
@@ -56,7 +56,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
             ->getData('method');
         $ccInstallments = $this
             ->getCCInstalments($payment);
-        
+
         if (!$quote->getId()
         ) {
             return $this;
@@ -69,11 +69,15 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
 
             $order->setBaseGrandTotal($quote->getBaseGrandTotal())
                 ->setGrandTotal($quote->getGrandTotal())
-                ->setBraspagFees($braspagFees)
-                ->setBraspagFeesAmount($quote->getBraspagFeesAmount());
-            
+                ->setBraspagFees($braspagFees ?? 0)
+                ->setBraspagFeesAmount($quote->getBraspagFeesAmount() ?? 0);
+
             $this->setOrderItemsWithBraspagFees($order);
+
+            return;
         }
+
+        $this->setOrderItemsWithBraspagFees($order);
     }
 
     /**
@@ -96,7 +100,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
      */
     private function setOrderItemsWithBraspagFees($order)
     {
-        $braspagFees = $order->getBraspagFees();
+        $braspagFees = $order->getBraspagFees() ?? 0;
         $orderItems = $order->getItems();
         foreach ($orderItems as $item) {
             list(
