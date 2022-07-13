@@ -64,11 +64,16 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
                 ]
             );
 
+            if ($order->getDiscountDescription()) {
+                $discountLabel = __('Discount (%1)', $order->getDiscountDescription());
+            } else {
+                $discountLabel = __('Discount');
+            }
             $this->_totals['discount'] = new \Magento\Framework\DataObject(
                 [
                     'code' => 'discount',
                     'value' => $this->helper->getCurrentCurrencyPrice($currencyRate, $totalCouponAmount),
-                    'label' => __('Discount')
+                    'label' => $discountLabel
                 ]
             );
 
