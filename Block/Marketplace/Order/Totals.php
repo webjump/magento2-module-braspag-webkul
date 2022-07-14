@@ -56,14 +56,6 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
                 ]
             );
 
-            $this->_totals['shipping'] = new \Magento\Framework\DataObject(
-                [
-                    'code' => 'shipping',
-                    'value' => $this->helper->getCurrentCurrencyPrice($currencyRate, $shippingamount),
-                    'label' => __('Shipping & Handling')
-                ]
-            );
-
             if ($order->getDiscountDescription()) {
                 $discountLabel = __('Discount (%1)', $order->getDiscountDescription());
             } else {
@@ -74,6 +66,14 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
                     'code' => 'discount',
                     'value' => $this->helper->getCurrentCurrencyPrice($currencyRate, $totalCouponAmount),
                     'label' => $discountLabel
+                ]
+            );
+
+            $this->_totals['shipping'] = new \Magento\Framework\DataObject(
+                [
+                    'code' => 'shipping',
+                    'value' => $this->helper->getCurrentCurrencyPrice($currencyRate, $shippingamount),
+                    'label' => __('Shipping & Handling')
                 ]
             );
 
