@@ -33,6 +33,7 @@ class BraspagFeesToSalesListCollection
                 [
                     'SUM(main_table.braspag_fees) AS braspag_fees',
                     'SUM(main_table.braspag_fees_amount) AS braspag_fees_amount',
+                    'SUM(main_table.reward_currency_amount) AS reward_currency_amount',
                 ]
             );
 

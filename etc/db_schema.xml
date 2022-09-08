@@ -27,5 +27,6 @@
     <table name="marketplace_saleslist" resource="default" engine="innodb">
         <column xsi:type="decimal" name="braspag_fees" precision="20" scale="4" comment="Braspag Fees"/>
         <column xsi:type="decimal" name="braspag_fees_amount" precision="20" scale="4" comment="Braspag Fees Amount"/>
+        <column xsi:type="decimal" name="reward_currency_amount" precision="20" scale="4" comment="Reward Currency Amount"/>
     </table>
 </schema>

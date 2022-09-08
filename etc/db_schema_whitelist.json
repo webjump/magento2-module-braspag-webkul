@@ -41,7 +41,8 @@
     "marketplace_saleslist": {
         "column": {
             "braspag_fees": true,
-            "braspag_fees_amount": true
+            "braspag_fees_amount": true,
+            "reward_currency_amount": true
         }
     }
 }
