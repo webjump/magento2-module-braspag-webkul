@@ -12,17 +12,8 @@ declare(strict_types=1);
 
 namespace Braspag\Webkul\Model\BraspagFees;
 
-use Webjump\CustomBraspagPagadorWebkul\Model\Item\ItemRewardPoints;
-
 class TaxCalculator
 {
-    private $itemRewardPoints;
-
-    public function __construct(
-        ItemRewardPoints $itemRewardPoints
-    ){
-        $this->itemRewardPoints = $itemRewardPoints;
-    }
 
     /**
      * Get total according number of installments and configured interest rate
