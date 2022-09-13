@@ -29,8 +29,8 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
             $refundedShippingAmount = $source['refunded_shipping_charges'];
             $couponAmount = $source['applied_coupon_amount'];
             $totaltax = $source['total_tax'];
-            $totalCouponAmount = $source['coupon_amount'];
-            $rewardCurrencyAmount = $source['reward_currency_amount'];
+            $totalCouponAmount = -$source['coupon_amount'];
+            $rewardCurrencyAmount = -$source['reward_currency_amount'];
             $braspagFeesAmount = $source['braspag_fees_amount'];
 
             $admintotaltax = 0;
