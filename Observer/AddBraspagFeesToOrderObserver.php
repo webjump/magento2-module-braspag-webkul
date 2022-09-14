@@ -109,7 +109,7 @@ class AddBraspagFeesToOrderObserver implements ObserverInterface
                 $baseRowTotalInclTax,
                 $rowTotalInclTax
             ) = $this->taxCalculator
-                ->getItemPricesInclBraspagFees($item, $braspagFees);
+                ->getItemPricesInclBraspagFees($order, $item, $braspagFees);
 
             $item->setData('braspag_fees', $braspagFees)
                 ->setData('base_price_incl_tax', $basePriceInclTax)

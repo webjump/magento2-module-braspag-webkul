@@ -29,7 +29,8 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
             $refundedShippingAmount = $source['refunded_shipping_charges'];
             $couponAmount = $source['applied_coupon_amount'];
             $totaltax = $source['total_tax'];
-            $totalCouponAmount = $source['coupon_amount'];
+            $totalCouponAmount = -$source['coupon_amount'];
+            $rewardCurrencyAmount = -$source['reward_currency_amount'];
             $braspagFeesAmount = $source['braspag_fees_amount'];
 
             $admintotaltax = 0;
@@ -68,6 +69,16 @@ class Totals extends \Webkul\Marketplace\Block\Order\Totals
                     'label' => $discountLabel
                 ]
             );
+
+            if (!empty($rewardCurrencyAmount)) {
+                $this->_totals['reward_currency_amount'] = new \Magento\Framework\DataObject(
+                    [
+                        'code' => 'reward_currency_amount',
+                        'value' => $this->helper->getCurrentCurrencyPrice($currencyRate, $rewardCurrencyAmount),
+                        'label' => __('333OBRA Friend')
+                    ]
+                );
+            }
 
             $this->_totals['shipping'] = new \Magento\Framework\DataObject(
                 [
