@@ -12,8 +12,22 @@ declare(strict_types=1);
 
 namespace Braspag\Webkul\Model\BraspagFees;
 
+use Braspag\Webkul\Model\BraspagFees\ItemRewardPoints;
 class TaxCalculator
 {
+    /**
+     * @var ItemRewardPoints $itemRewardPoints
+     */
+    protected $itemRewardPoints;
+
+    /**
+     * @param ItemRewardPoints $itemRewardPoints
+     */
+    public function __construct(
+        ItemRewardPoints $itemRewardPoints
+    ) {
+        $this->itemRewardPoints = $itemRewardPoints;
+    }
 
     /**
      * Get total according number of installments and configured interest rate
@@ -69,11 +83,12 @@ class TaxCalculator
     /**
      * Get item order prices including braspag fees
      *
+     * @param mixed $order
      * @param mixed $orderItem
      * @param mixed $interestRate
      * @return array
      */
-    public function getItemPricesInclBraspagFees($orderItem, $interestRate)
+    public function getItemPricesInclBraspagFees($order, $orderItem, $interestRate)
     {
         $basePriceInclTax = $this
             ->getTotalInclBraspagFees(
@@ -86,12 +101,12 @@ class TaxCalculator
             );
         $baseRowTotalInclTax = $this
             ->getTotalInclBraspagFees(
-                ($orderItem->getBaseRowTotalInclTax() - $orderItem->getDiscountAmount()),
+                ($orderItem->getBaseRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($order, $orderItem)),
                 $interestRate
             );
         $rowTotalInclTax = $this
             ->getTotalInclBraspagFees(
-                ($orderItem->getRowTotalInclTax() - $orderItem->getDiscountAmount()),
+                ($orderItem->getRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($order, $orderItem)),
                 $interestRate
             );
         return [
