@@ -101,12 +101,12 @@ class TaxCalculator
             );
         $baseRowTotalInclTax = $this
             ->getTotalInclBraspagFees(
-                ($orderItem->getBaseRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($order, $orderItem)),
+                ($orderItem->getBaseRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($orderItem, $order)),
                 $interestRate
             );
         $rowTotalInclTax = $this
             ->getTotalInclBraspagFees(
-                ($orderItem->getRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($order, $orderItem)),
+                ($orderItem->getRowTotalInclTax() - $orderItem->getDiscountAmount() - $this->itemRewardPoints->getAmountPerItem($orderItem, $order)),
                 $interestRate
             );
         return [
