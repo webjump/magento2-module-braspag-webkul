@@ -9,7 +9,7 @@
 
 declare(strict_types=1);
 
-namespace Webjump\CustomBraspagPagadorWebkul\Model\Item;
+namespace Braspag\Webkul\Model\BraspagFees;
 
 use Magento\Quote\Model\Quote\Item as QuoteItem;
 use Magento\Sales\Model\Order\Item as OrderItem;
