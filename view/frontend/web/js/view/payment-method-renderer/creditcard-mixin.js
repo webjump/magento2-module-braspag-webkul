@@ -30,7 +30,11 @@ define([
                 getTotalsAction([], )
                 return;
             }
-            totals.grand_total = value * this.allInstallments().find(installment => installment.value == value)?.price
+            const installment = this.allInstallments().find(installment => installment.value == value);
+            if (!installment || !installment.price) {
+                return;
+            }
+            totals.grand_total = installment.price
             this.totals(totals)
         },
 
